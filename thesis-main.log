@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.7.17)  12 OCT 2026 19:29
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.7.17)  15 OCT 2026 08:23
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -655,38 +655,34 @@ Chapter 5.
 
 
 {C:/Users/franc/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}]
-LaTeX Font Info:    Trying to load font information for U+msa on input line 35.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 40.
  (C:\Users\franc\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 35.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 40.
  (C:\Users\franc\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-LaTeX Font Info:    Trying to load font information for U+lasy on input line 35.
+LaTeX Font Info:    Trying to load font information for U+lasy on input line 40.
  (C:\Users\franc\AppData\Local\Programs\MiKTeX\tex/latex/base\ulasy.fd
 File: ulasy.fd 1998/08/17 v2.2e LaTeX symbol font definitions
 )
-Package cleveref Info: loaded `english' language definitions on input line 39.
+Package cleveref Info: loaded `english' language definitions on input line 41.
  [24]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-Package cleveref Info: loaded `english' language definitions on input line 45.
- [25]
-Overfull \hbox (36.58604pt too wide) in paragraph at lines 46--46
+Overfull \hbox (36.58604pt too wide) in paragraph at lines 47--47
 []\OT1/cmr/bx/n/17.28 Governance, Glos-sary, and the Cor-po-rate Knowl-
  []
 
-Package cleveref Info: loaded `english' language definitions on input line 53.
-[26]
-Overfull \hbox (7.39401pt too wide) in paragraph at lines 54--54
+Package cleveref Info: loaded `english' language definitions on input line 52.
+[25]
+Overfull \hbox (7.39401pt too wide) in paragraph at lines 55--55
 []\OT1/cmr/bx/n/17.28 Component In-te-gra-tion and Or-ches-tra-tion for
  []
 
-Package cleveref Info: loaded `english' language definitions on input line 61.
-[27])
+Package cleveref Info: loaded `english' language definitions on input line 58.
+[26])
 Package cleveref Info: loaded `english' language definitions on input line 40.
- [28] (thesis-main.bbl
+ [27] (thesis-main.bbl
 Package cleveref Info: loaded `english' language definitions on input line 1.
  [38
 
@@ -708,17 +704,20 @@ Package rerunfilecheck Info: File `thesis-main.out' has not changed.
 (rerunfilecheck)             Checksum: 0EB9A06E09A6CEE2FA4BDBCAD63ACADF;975.
  ) 
 Here is how much of TeX's memory you used:
- 25699 strings out of 467871
- 483914 string characters out of 5418376
- 902299 words of memory out of 5000000
- 54096 multiletter control sequences out of 15000+600000
- 634595 words of font info for 67 fonts, out of 8000000 for 9000
+ 25707 strings out of 467871
+ 484068 string characters out of 5418376
+ 901299 words of memory out of 5000000
+ 54103 multiletter control sequences out of 15000+600000
+ 635239 words of font info for 69 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 114i,5n,122p,1539b,594s stack positions out of 10000i,1000n,20000p,200000b,200000s
-<C:/Users/franc/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/franc/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/franc/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsl12.pfb><C:/Users/franc/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb>
-Output written on thesis-main.pdf (9 pages, 107719 bytes).
+ 114i,5n,122p,1188b,622s stack positions out of 10000i,1000n,20000p,200000b,200000s
+
+pdfTeX warning (dest): name{chapter.3} has been referenced but does not exist, replaced by a fixed one
+
+ <C:\Users\franc\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/franc/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/franc/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/franc/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsl12.pfb><C:/Users/franc/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb>
+Output written on thesis-main.pdf (8 pages, 105872 bytes).
 PDF statistics:
- 127 PDF objects out of 1000 (max. 8388607)
+ 123 PDF objects out of 1000 (max. 8388607)
  36 named destinations out of 1000 (max. 500000)
  53 words of extra memory for PDF output out of 10000 (max. 10000000)
 
