@@ -1,39 +1,95 @@
-\chapter{The Corporate Context and Supply Chain Complexity} 
+%----------------------------------------------------------------------------------------
+\chapter{Corporate Profile and Strategic Overview of Amadori S.p.A.}
 \label{chap:context}
-\chaptermark{Corporate Context}
+\chaptermark{Corporate Profile}
 %----------------------------------------------------------------------------------------
 
-\section[The Poultry Sector]{Company Overview and the Unique Realities of the Poultry Sector}
+\section[Industrial Profile]{Industrial Profile and the Vertically Integrated Supply Chain}
+\label{sec:industrial_profile}
 
-Amadori S.p.A. represents a premier model of a fully closed, vertically integrated agri-food enterprise within the European zootechnical sector. Unlike traditional manufacturing paradigms where raw materials can be procured on-demand from global markets to buffer against fluctuating consumer pull, the poultry supply chain is strictly bound by unyielding biological cycles. The corporate integration matrix spans the entire livestock lifecycle under a unified governance framework, encompassing feed mills, parent stock breeding farms, incubation hatcheries, broiler growing farms, primary processing facilities, and downstream logistics networks. While this total vertical control guarantees biosecurity, food safety, and rigorous end-to-end traceability, it introduces structural rigidities and temporal decoupling that heavily complicate demand planning.
+Amadori S.p.A. is one of the leading agri-food industrial groups in Italy, specializing in the production and distribution of animal and plant-based protein products. 
+Headquartered in Romagna, the company operates across the entire national territory through an industrial architecture based on direct supply chain integration. 
+In contrast to open-market sourcing models, full vertical integration allows the enterprise to control every operational step directly, mitigating biosecurity risks, 
+ensuring sanitary compliance, and managing cost volatility on primary agricultural commodities.
 
-The operational dynamics of the poultry sector are governed by an inelastic, upstream biological lead time. Initiating an increase in production volume requires expanding parent stock hatcheries and waiting for biological growth, incubation phases, and broiler fattening periods—a process that unfolds over several months. Consequently, the volume of livestock entering processing facilities on any given day is effectively predetermined by decisions made weeks or months prior. This biological inertia creates acute vulnerabilities when confronted with the fast-moving modern retail sector, which is characterized by volatile promotional campaigns and sudden demand shifts.
+The operational backbone of the group spans a closed-loop sequence from primary agricultural inputs to customer fulfillment:
+\begin{enumerate}
+    \item \textbf{Feed Mills:} Internal sourcing and processing of raw agricultural grains within company-owned feed mills, 
+    establishing nutritional and biological control at the base of the livestock cycle.
+    \item \textbf{Breeder Farms and Incubators:} Centralized management of parent flocks and incubation facilities, 
+    governing hatch cycles under strict biosafety standards.
+    \item \textbf{Integrated Farming Network:} Standardized livestock rearing executed across both company-owned and contracted farms, 
+    operating under certified animal welfare and environmental protocols.
+    \item \textbf{Primary and Secondary Processing Plants:} Industrial facilities managing automated transformations and modified-atmosphere packaging.
+    \item \textbf{Cold-Chain Logistics and Distribution Platforms:} A nationwide network of temperature-controlled logistics platforms managing daily 
+    dispatches to modern mass retail (large-scale distribution), private label partners, and commercial food service.
+\end{enumerate}
 
-Furthermore, while traditional manufacturing follows an additive, assembly-oriented paradigm—where discrete parts are combined into a single product—poultry processing operates as a divergent, subtractive reverse supply chain. The processing plant acts as a disassembly engine, taking a single biological input (the live bird) and breaking it down into a highly differentiated array of co-products, ranging from premium anatomical cuts (breasts, fillets) to secondary industrial inputs. This introduces the complex operational challenge of the carcass mass-balance (\textit{bilancio di massa}). Within the market, consumer demand is rarely uniform across the entire bird; a commercial promotion may cause a sharp spike in demand for chicken breast fillets while demand for wings or drumsticks remains completely flat. Because the facility cannot harvest breast meat without generating proportional volumes of secondary cuts, the disassembly line creates systemic structural surpluses. Managing this balance requires advanced predictive capabilities to align fixed biological inflows with highly asymmetrical commercial demand.
+As illustrated in \Cref{fig:integrated_supply_chain}, this vertically integrated structure establishes an end-to-end operational loop that synchronizes raw agricultural inputs with downstream retail distribution.
 
-\section[The Complexity of the BOM]{From Neutral to Finished Product: The Complexity of the Bill of Materials}
-
-To manage the structural friction between fixed biological inflows and divergent finished product outputs, the enterprise utilizes a multi-level, hierarchical Bill of Materials (BOM). The structural complexity of this BOM stems from the fact that a single biological asset can be routed through an almost infinite variation of cutting, secondary processing (e.g., breading, seasoning, cooking), marinating, and packaging configurations. To prevent systemic data fragmentation and eliminate predictive noise across tens of thousands of volatile finished stock-keeping units (SKUs), the supply chain architecture introduces a critical abstraction level: the \textit{Neutral Article} (\textit{Articolo Neutro}).
-
-The multi-level BOM is split into two distinct operational phases: the upstream primary disassembly phase and the downstream final differentiation phase. In the primary phase, raw inputs are transformed into stable, generic sub-assemblies—such as bulk deboned breast meat or standardized whole carcasses—completely decoupled from specific customer branding, seasoning variants, or final packaging constraints. These sub-assemblies constitute the neutral product tier. By aggregating demand at this neutral level, statistical forecasting models can isolate stable historical consumption patterns, bypassing the extreme volatility and short lifecycles associated with individual finished customer items, especially for low-rotating products (\textit{Articoli Basso Rotanti}).
-
-The final tier of the BOM governs the final differentiation phase, where the neutral sub-assembly is exploded into consumer-facing finished SKUs through secondary processing and localized packaging operations (such as modified atmosphere trays, private-label branding, or weight-variable configurations). This structural differentiation occurs at the last possible node of the production network, a supply chain strategy known as postponement. When demand baselines are generated at the macro-neutral level, downstream procedural engines explode these volumes through the multi-level BOM to calculate exact requirements for packaging films, ingredients, and processing line capacities. Centralizing this BOM taxonomy within a decoupled semantic architecture is vital: if the underlying relationship between the neutral product and the finished SKU is siloed within fragmented database views, real-time simulation becomes impossible. 
-
-\section[The Planning Cycle]{The Planning Cycle: Demand Forecasting vs. Demand Planning}
-
-Operating successfully within this biological and structural matrix requires a rigorous, multi-stage planning cycle. A critical conceptual distinction must be maintained between the technical execution of the \textit{Demand Forecast} and the strategic orchestration of the \textit{Demand Planning} process. Although frequently conflated in legacy organizational models, these two phases serve entirely different functions, operating at different levels of abstraction and data velocity within the corporate governance loop.
-
-\begin{figure}[h!]
-\centering
-\caption{The Enterprise Planning Loop: Forecast Ingestion to Plan Consensus}
-\label{fig:forecast_vs_planning_cycle}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/supplychain.png}
+    \caption{The Vertically Integrated Supply Chain Architecture of Amadori S.p.A.}
+    \label{fig:integrated_supply_chain}
 \end{figure}
 
-The \textit{Demand Forecast} represents the unconstrained, purely statistical estimation of future market realities. It is an algorithmic exercise that utilizes historical sales records, reconditioned actuals, and deterministic exogenous variables (such as holiday calendars and moving events) to project organic baseline consumption. The current ARIMAX engine discussed in Chapter 3 represents the core of this phase, computing independent forecasts for every unique customer-product combination over a rolling 16-week planning horizon. The objective of the Demand Forecast is mathematical objectivity; it is designed to be free from human bias, commercial optimism, or operational constraints, providing a clean, data-driven baseline of organic market pull.
+To operationalize complete transparency, Amadori enforces a comprehensive Traceability and Safety Governance framework. 
+Digital tracking systems record every unit movement from raw feed batch origin to primary processing date, portioning line, and final distributor dispatch. 
+This structural control protects brand equity, fulfills rigorous international certification standards, and guarantees total food safety compliance across all production hubs.
 
-Conversely, \textit{Demand Planning} is a collaborative, cross-functional business process that ingests the statistical Demand Forecast as its foundational raw input and transforms it into an actionable corporate plan. During this phase, human planners, category managers, and commercial directors layer qualitative business intelligence on top of the statistical baseline. This includes factoring in upcoming commercial promotions, strategic marketing campaigns, new product introductions (NPI), and competitor activities. Furthermore, the Demand Planning process reconciles this commercial demand-push with the operational and biological constraints of the supply chain—verifying whether the projected volumes violate processing plant capacities, distribution limits, or the anatomical carcass mass-balance. 
+\section[Portfolio Strategy]{Multi-Protein Strategy and Manufacturing Complexity}
+\label{sec:portfolio_strategy}
 
-The output of the Demand Planning cycle is the finalized, constrained \textit{Consensus Plan}, which directly drives the downstream procurement of packaging materials, feed scheduling, hatchery allocations, and daily plant operations. Within a volatile agri-food ecosystem, the separation and fluid connection of these two phases is paramount. By ensuring that the statistical forecast is decoupled from the collaborative planning layer, the enterprise can isolate organic market signals from commercial interventions. This structural clarity allows the Data Office to deliver a trustworthy predictive Data Product to the business, empowering planners to run agile, multi-scenario simulations and quickly recalculate materials requirements via the hierarchical BOM whenever market conditions shift.
+To address shifts in consumer demand, dietary habits, and retail channel dynamics, Amadori has expanded its commercial focus under a multi-protein strategy. 
+The group has moved beyond its traditional poultry core into a multi-category product portfolio structured across four distinct protein sources:
+\begin{itemize}
+    \item \textbf{White Proteins (Poultry):} The core volume driver of the company, centered on integrated chicken and turkey operations.
+    \item \textbf{Yellow Proteins (Eggs):} Shell egg production and liquid egg products designed for both direct retail sales and food service manufacturing.
+    \item \textbf{Pink Proteins (Pork):} Fresh and cured pork charcuterie, expanded strategically through the acquisition of the \textit{Lenti} brand, 
+    which specializes in high-end cooked hams and deli counter items.
+    \item \textbf{Green Proteins (Plant-Based):} Alternative vegetable proteins derived from soy, pea, and cereal grains, 
+    consolidated through the acquisition of the \textit{Unconventional} brand to capture market share within flexitarian and alternative food segments.
+\end{itemize}
 
-% TO CHECK
-I integrated the unconstrained sales forecasts, expressed directly in crates, harvested from the Board corporate planning platform, establishing it as the sole source of truth for medium-term demand planning. The selection of Board as the enterprise planning node is structurally justified by its classification as a specialized platform that natively unifies business intelligence with formal Financial Planning and Analysis (FP\&A) functionality \cite{gartner2021magic},. This integration bridges the historical gap between baseline analytics and process-oriented operational applications—such as budgeting, multi-tier scheduling, and corporate consolidation — allowing power users to deploy transactional drag-and-drop business rules directly within a unified environment.
+From a supply chain perspective, this diversified portfolio introduces substantial operational complexity. 
+Managing multi-protein manufacturing lines requires strict segregation between meat and plant-based processing to prevent cross-contamination, 
+separate production scheduling calendars, and domain-specific inventory management rules across fresh, cured, and frozen storage categories.
+
+\section[Operational Constraints]{Operational Constraints: Biological Lead Times, Perishability, and Component Balancing}
+\label{sec:operational_constraints}
+
+The operational management of Amadori's poultry value chain is governed by three non-negotiable physical and biological constraints:
+\begin{itemize}
+    \item \textbf{Biological Inelasticity and Upstream Lead Times:} Unlike discrete manufacturing industries where raw material procurement can 
+    scale dynamically to demand shocks, livestock production follows rigid biological timelines. Breeding, incubation, and grow-out cycles are structurally fixed; 
+    an increase or decrease in downstream market demand cannot immediately alter the volume of birds already placed on farms weeks or months earlier. 
+    Upstream production is therefore highly inelastic.
+    \item \textbf{High Product Perishability:} Fresh and ultra-fresh poultry items have limited shelf lives, ranging from several days to a few weeks depending 
+    on packaging technologies (e.g., modified atmosphere). This leaves virtually no room for inventory buffering: holding excess finished stock leads directly 
+    to product obsolescence, mandatory price discounting, or physical scrap.
+    \item \textbf{Anatomical Component Balancing:} A bird represents an indivisible biological unit that must be processed in its entirety. 
+    Consumer and retail demand, however, is structurally asymmetrical: market demand frequently spikes for specific cuts (such as chicken breasts or thighs) 
+    due to seasonal trends or retail promotions, while demand for remaining anatomical cuts (wings, legs, or carcasses) may remain flat or decline. 
+    Operational planning must constantly balance these proportions, diverting surplus parts into frozen storage, secondary processing (frankfurters, breaded items), 
+    or industrial food service to prevent costly structural imbalances.
+\end{itemize}
+
+\section[Demand Planning Rationale]{Strategic Rationale: Demand Planning as the Core Thesis Use Case}
+\label{sec:demand_planning_rationale}
+
+The convergence of biological supply inelasticity, extreme product perishability, and anatomical component balancing establishes the operational context of this thesis. 
+In Amadori's business model, \textbf{Demand Planning represents the critical operational bridge} reconciling rigid agricultural production with volatile market demand.
+
+Downstream retail demand is inherently unstable, driven by weekly promotions in modern supermarkets, weather fluctuations, and holiday calendars. 
+Conversely, upstream farming schedules cannot be altered on short notice. In this environment, stochastic demand forecasting cannot be treated merely as a 
+commercial exercise; it serves as the foundational steering mechanism for the entire Sales and Operations Planning cycle. Accurate demand signals determine 
+line balancing schedules, guide procurement parameters, and stabilize logistics dispatches.
+
+Underestimating demand leads to retail stockouts, service-level penalties from supermarket chains, and lost revenue. Overestimating demand generates stock 
+surpluses that expire quickly, triggering distress discounts, unplanned cold-storage costs, and food waste. Furthermore, the downstream Material Planning 
+engine—which calculates gross component requirements for packaging, labels, and ingredients as detailed in \Cref{chap:demandforecast}—is directly dependent 
+on the accuracy and stability of this upstream demand forecast.
+
+Because improving the speed, semantic clarity, and computational accessibility of these demand and material signals yields the highest operational impact for 
+the enterprise, Demand Planning was selected as the foundational use case for this thesis.
