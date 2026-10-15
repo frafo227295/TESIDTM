@@ -1,0 +1,118 @@
+\begin{thebibliography}{10}
+
+\bibitem{borgman2015big}
+Christine~L. Borgman.
+\newblock {\em Big Data, Little Data, No Data: Scholarship in the Networked
+  World}.
+\newblock MIT Press, Cambridge, MA, 2015.
+
+\bibitem{bowker1999sorting}
+Geoffrey~C. Bowker and Susan~Leigh Star.
+\newblock {\em Sorting Things Out: Classification and Its Consequences}.
+\newblock MIT Press, Cambridge, MA, 1999.
+
+\bibitem{box1970time}
+George E.~P. Box and Gwilym~M. Jenkins.
+\newblock {\em Time Series Analysis: Forecasting and Control}.
+\newblock Holden-Day, San Francisco, CA, 1970.
+
+\bibitem{boyd2012critical}
+Danah Boyd and Kate Crawford.
+\newblock Critical questions for big data: Provocations for a cultural,
+  technological, and scholarly phenomenon.
+\newblock {\em Information, Communication \& Society}, 15(5):662--679, 2012.
+
+\bibitem{dama2024dmbok}
+{DAMA International}.
+\newblock {\em The DAMA Guide to the Data Management Body of Knowledge
+  (DAMA-DMBOK2 Revised)}.
+\newblock DAMA International, revised edition, 2024.
+
+\bibitem{davenport2017competing}
+Thomas~H. Davenport and Jeanne~G. Harris.
+\newblock {\em Competing on Analytics: The New Science of Winning}.
+\newblock Harvard Business Review Press, Boston, MA, updated edition, 2017.
+
+\bibitem{dehghani2022data}
+Zhamak Dehghani.
+\newblock {\em Data Mesh: Delivering Data-Driven Value at Scale}.
+\newblock O'Reilly Media, Sebastopol, CA, 2022.
+
+\bibitem{edge2024local}
+Darren Edge, Ha~Trinh, Aidan Newman, Joshua Christopher, Andrew Evans, Shenghao
+  Wang, Kevin Larson, Robert Foster, Kyle Bennett, Scott Jones, et~al.
+\newblock From local to global: A graph rag approach to query-focused
+  summarization.
+\newblock {\em arXiv preprint arXiv:2404.16130}, 2024.
+
+\bibitem{gruber1993translation}
+Thomas~R. Gruber.
+\newblock A translation approach to portable ontology specifications.
+\newblock {\em Knowledge Acquisition}, 5(2):199--220, 1993.
+
+\bibitem{hilger2026bridging}
+Joseph Hilger, Lulit Tesfaye, and Zachary Wahl.
+\newblock {\em Bridging Knowledge, Data, and AI: Harnessing the Semantic Layer
+  Framework to Drive Intelligence}.
+\newblock Professional and Applied Computing Series. Springer Nature, Cham,
+  Switzerland, 1st edition, 2026.
+
+\bibitem{hogan2021knowledge}
+Aidan Hogan, Eva Blomqvist, Michael Cochez, Claudia d'Amato, Gerard de~Melo,
+  Claudio Gutierrez, Jos{\'e} Emilio~Labra Gayo, Sabrina Kirrane, Sebastian
+  Neumaier, Axel Polleres, Roberto Navigli, Axel-Cyrille~Ngonga Ngomo,
+  Sabbir~M. Rashid, Anisa Rula, Lukas Schmelzeisen, Juan Sequeda, Steffen
+  Staab, and Antoine Zimmermann.
+\newblock Knowledge graphs.
+\newblock {\em ACM Computing Surveys}, 54(4):1--37, 2021.
+
+\bibitem{kitchin2014data}
+Rob Kitchin.
+\newblock {\em The Data Revolution: Big Data, Open Data, Data Infrastructures
+  and Their Consequences}.
+\newblock SAGE Publications, London, 2014.
+
+\bibitem{Leonelli2016data}
+Sabina Leonelli.
+\newblock {\em Data-Centric Biology: A Philosophical Study}.
+\newblock University of Chicago Press, Chicago, IL, 11 2016.
+
+\bibitem{lewis2020retrieval}
+Patrick Lewis, Ethan Perez, Aleksandra Piktus, Fabio Petroni, Vladimir
+  Karpukhin, Naman Goyal, Heinrich K{\"u}ttler, Mike Lewis, Wen-tau Yih, Tim
+  Rockt{\"a}schel, Sebastian Riedel, and Douwe Kiela.
+\newblock Retrieval-augmented generation for knowledge-intensive nlp tasks.
+\newblock {\em Advances in Neural Information Processing Systems},
+  33:9459--9474, 2020.
+
+\bibitem{nonaka1995knowledge}
+Ikujiro Nonaka and Hirotaka Takeuchi.
+\newblock {\em The Knowledge-Creating Company: How Japanese Companies Create
+  the Dynamics of Innovation}.
+\newblock Oxford University Press, New York, NY, 1995.
+
+\bibitem{noy2001ontology}
+Natalya~F. Noy and Deborah~L. McGuinness.
+\newblock Ontology development 101: A guide to creating your first ontology.
+\newblock Technical Report KSL-01-05, Stanford Knowledge Systems Laboratory,
+  Stanford, CA, 2001.
+
+\bibitem{patel2023comparative}
+Dip~Bharatbhai Patel.
+\newblock Comparative analysis of data visualization tools: Tableau, power bi
+  \& looker.
+\newblock {\em The Eastasouth Journal of Information System and Computer
+  Science}, 1(1):55--59, 2023.
+
+\bibitem{potturi2025demystifying}
+Pranitha Potturi.
+\newblock Demystifying semantic layers in business intelligence platforms.
+\newblock {\em Sarcouncil Journal of Engineering and Computer Sciences},
+  4(8):612--618, 2025.
+
+\bibitem{gartner2021magic}
+James Richardson, Kurt Schlegel, Rita Sallam, Austin Kronz, and Julian Sun.
+\newblock Magic quadrant for analytics and business intelligence platforms.
+\newblock Technical Report G00467317, Gartner, February 2021.
+
+\end{thebibliography}

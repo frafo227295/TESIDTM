@@ -1,0 +1,69 @@
+
+%----------------------------------------------------------------------------------------
+\chapter{The Technological Framework and Software Stack}
+\label{chap:techstack}
+\chaptermark{Technological Stack}
+%----------------------------------------------------------------------------------------
+\section[Backend Infrastructure]{Backend Infrastructure and Data Platform Architecture}
+
+To operationalize the domain-oriented Data Product model and support interactive analytical workloads within Amadori S.p.A., 
+the enterprise data architecture is undergoing an evolutionary transition from an on-premises relational infrastructure toward a scalable, 
+cloud-native data platform. 
+
+The baseline enterprise environment relies primarily on an on-premises Oracle database, which historically serves as the operational transaction 
+repository and the target for analytical queries. To overcome the computational constraints of centralized on-premises storage and eliminate 
+contention between transactional processing and resource-intensive analytical calculations, the target architecture introduces Google BigQuery 
+as the enterprise cloud data warehouse. BigQuery provides a serverless, highly scalable environment based on distributed compute engines and 
+columnar storage, enabling parallelized execution of complex analytical queries over large-scale historical datasets.
+
+Rather than implementing an abrupt cutover, the transition follows a phased migration strategy. 
+In the initial phase, analytical assets and ingestion pipelines continue to read directly from the operational Oracle database. 
+As data models, historical partitions, and ETL routines are progressively refactored and validated, tables are transferred to Google BigQuery. 
+During this transitional period, both database connections remain active simultaneously.
+
+The presence of a centralized Semantic Layer implemented in Looker plays a strategic role in facilitating this dual-connection phase. 
+Because Looker functions via in-database querying rather than data extraction, it can maintain concurrent dialect connections to both Oracle and BigQuery. 
+Business dimensions and metrics formalized in LookML can initially target tables hosted on the Oracle instance; subsequently, 
+as individual domains complete their migration to BigQuery, the underlying connection references within the LookML models are updated to point 
+to the cloud tables. This decoupling ensures that downstream analytical consumers, executive reports, and AI interfaces remain completely shielded 
+from the physical migration process, experiencing no disruption in metric definitions or query behavior while backend storage is shifted.
+
+\section[Looker and LookML]{Formalizing Business Data: The Semantic Layer with Looker and LookML}
+\label{sec:looker_lookml}
+
+To operationalize the conceptual definitions established by the business glossary and enterprise ontology, the architecture employs Looker and its declarative modeling language, LookML. Within this technological framework, Looker serves as the centralized execution engine for the enterprise Semantic Layer \cite{patel2023comparative}. Rather than relying on middle-tier in-memory data extraction, Looker operates via an in-database query architecture: analytical data remains stored within the underlying database, while the semantic platform dynamically generates and executes optimized SQL queries against the target engine at runtime \cite{gartner2021magic}.
+
+This in-database approach plays a critical role during the infrastructure transition from on-premises Oracle to Google BigQuery. Because Looker abstracts physical database connections behind standardized project configurations, it supports concurrent connections across distinct database dialects. In the initial deployment phase, LookML models point directly to tables hosted on the Oracle instance. As data domains and transformation pipelines are progressively migrated to BigQuery, engineers update the connection parameter within the corresponding LookML model files. The physical relocation of tables and dialect adaptations (translating Oracle PL/SQL functions to GoogleSQL syntax) remain completely encapsulated inside the modeling code. Downstream analytical applications, business dashboards, and autonomous AI agents continue to query identical dimensions and measures, unaffected by backend migrations.
+
+The LookML modeling architecture is structured across three primary abstractions: \textit{Views}, \textit{Explores}, and \textit{Models}:
+\begin{itemize}
+    \item \textbf{Views:} A view maps directly to an underlying database table or derived query. Within the view, raw database fields are defined as business \textit{dimensions} (attributes used for grouping and filtering) or \textit{measures} (aggregate computations such as sums, averages, or count distincts). Business calculation rules are declared once within this layer. For example, the baseline sales logic isolating the \textit{Consuntivo Ricondizionato} and the $33\%$ promotional threshold discussed in \Cref{chap:demandforecast} is codified directly inside the product sales view, preventing discrepancy across analytical consumers.
+    \item \textbf{Explores:} An explore defines how multiple views join together, reflecting multi-entity business workflows. Within an explore, the platform specifies primary keys, join relationships (one-to-one, one-to-many, many-to-one), and join conditions. In the context of material planning, an explore formalizes the relationship between customer levels—linking \textit{Forecast Clients} to downstream \textit{Shipping Clients}—and manages the component mapping from \textit{Finished-from-Neutral} (PFN) codes back to their parent \textit{Neutral Articles} (PN).
+    \item \textbf{Models:} A model file specifies the database connection (Oracle or BigQuery) and defines the set of Explores exposed to end users and API interfaces, enforcing role-based access controls and caching policies.
+\end{itemize}
+
+Because LookML is maintained as human-readable, plain-text code, it integrates into standard software development workflows \cite{potturi2025demystifying}. Metric definitions and schema modifications are tracked in a centralized Git repository. Any proposed change to business logic undergoes version control, code review, and automated Continuous Integration (CI) testing before being deployed to production. This code-first approach eliminates metric discrepancies across reporting interfaces, establishing a reliable, versioned API that bridges physical storage engines and upstream analytical consumers.
+
+\section[The OpenMetadata Ecosystem]{Governance, Glossary, and the Corporate Knowledge Graph: The OpenMetadata Ecosystem}
+
+While Looker provides the execution engine for data semantics, maintaining comprehensive visibility, auditable data contracts, and automated lineage across a decentralized Data Product architecture requires an enterprise-grade metadata platform. This capability is realized through the deployment of the OpenMetadata ecosystem. OpenMetadata is an open-source, schema-first metadata management platform that utilizes standardized JSON schemas to unify data discovery, governance, and quality monitoring into a single, cohesive repository. By treating metadata as a dynamic, operational asset rather than static documentation, OpenMetadata provides the structural transparency required to enforce the data governance frameworks outlined in the DAMA Data Management Body of Knowledge \cite{dama2024dmbok}.
+
+Within this architecture, OpenMetadata serves as the unified orchestrator for the enterprise \textit{Business Glossary}. Rather than maintaining definitions in isolated text documents, the glossary terms are directly injected into OpenMetadata's core catalog and programmatically linked to live technical assets. A glossary term such as ``Carcass Mass-Balance'' or ``Neutral Product Allocation'' is explicitly mapped to the exact LookML views, database schemas, and data pipelines that compute those entities. This deep integration establishes total end-to-end data lineage, allowing data stewards to trace the complete evolutionary path of an informational asset. If an upstream transactional schema within the primary ERP changes or an anomaly occurs during the automated weekly rolling forecast execution, OpenMetadata's automated ingestion daemons instantly detect the mutation, perform an impact analysis across the dependency web, and notify downstream data consumers before the structural modification can corrupt corporate planning models.
+
+Furthermore, OpenMetadata abstracts these interconnected technical components and metadata relationships to construct a live, dynamic corporate \textit{Knowledge Graph}. Every entity in the data ecosystem—ranging from raw storage buckets and data lakehouse tables to Looker dimensions, machine learning pipelines, and human organizational roles—is represented as a distinct node within a highly structured graph database topology. These nodes are bound together by directed semantic edges that explicitly define their relationships, dependencies, and operational ownership. For example, a specific finished SKU node is linked via an ontological edge to its parent Neutral Article node, which is connected to its certifying Data Champion and bound by a specific data contract SLA. By unifying master data, technical metadata, and business governance definitions into an operational graph, the enterprise can programmatic evaluate data quality by design, ensuring absolute data trustworthiness and providing a context-rich roadmap to guide autonomous artificial intelligence engines.
+
+\section[Generative AI Enablement]{Component Integration and Orchestration for Generative AI Enablement}
+
+The final, unifying layer of the technological framework is the orchestration and integration architecture that connects the cloud data platform, the Looker Semantic Layer, and the OpenMetadata Knowledge Graph to enable an intuitive, conversational Generative AI analytical experience. Historically, deploying Large Language Models (LLMs) over enterprise databases required models to write raw SQL code directly against physical schemas—a design choice that frequently leads to catastrophic query errors, unhandled table joins, and severe logical hallucinations. The integrated stack presented here completely bypasses this vulnerability by introducing a structured Graph-Augmented Retrieval (GraphRAG) loop, ensuring that autonomous AI agents interact exclusively with certified semantic models rather than raw, ungoverned data infrastructures.
+
+The orchestration sequence begins when a corporate supply chain planner inputs a natural language query into the user interface (e.g., "What is our projected organic baseline demand for fresh whole birds over the next four weeks, excluding scheduled retail promotions?"). This prompt is intercepted by a specialized AI Agent framework, which serves as the cognitive orchestrator of the ecosystem. Instead of directly executing next-token probability distributions over the user's raw text, the AI Agent transmits the query to the OpenMetadata API to resolve structural and semantic context. OpenMetadata interrogates the corporate Knowledge Graph and returns a tailored context packet containing the certified definitions from the Business Glossary, the active data contract SLAs, and the precise object paths of the relevant semantic entities. 
+
+Armed with this validated ontological context, the AI Agent interacts directly with the Looker Semantic Layer via the Looker SDK, translating the user's natural language intent into a structured Looker API call rather than an arbitrary SQL string. The Semantic Layer processes the request, safely executes the pre-compiled, optimized LookML queries against the backend lakehouse storage engine, and returns mathematically validated, deterministic metrics back to the agent. Finally, the AI Agent passes these verified numbers, alongside the lineage metadata, through the LLM to generate a natural, context-aware, and completely verifiable response for the end user.
+
+\begin{figure}[h!]
+\centering
+\caption{The Cognitive GraphRAG Execution and Verification Loop}
+\label{fig:rag_execution_loop}
+\end{figure}
+
+Through this sophisticated integration and orchestration loop, the enterprise successfully resolves the deep-seated epistemic friction between data writing and data reading. By forcing the Generative AI engine to route all analytical requests through a centralized Semantic Layer and a governed Knowledge Graph, the architecture establishes an unyielding barrier against algorithmic hallucinations. Planners are empowered to conduct complex supply chain simulations, execute multi-level BOM explosions, and isolate baseline trends from promotional uplifts through fluid conversational interfaces, secure in the knowledge that every output is mathematically certified by the underlying data platform.

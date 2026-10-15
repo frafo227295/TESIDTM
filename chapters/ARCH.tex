@@ -1,0 +1,223 @@
+\chapter{Architectural and Organizational Evolution}
+\label{chap:architecture}
+\chaptermark{Architectural Evolution}
+
+%----------------------------------------------------------------------------------------
+% CHAPTER INTRODUCTION
+%----------------------------------------------------------------------------------------
+
+This chapter describes the architectural and organizational framework designed to resolve the gap between operational data generation and analytical use. 
+Drawing on decentralized  data concepts, semantic modeling, and enterprise knowledge representation, the chapter examines the shift from pipeline-centric 
+data architectures toward domain-oriented data products. It then analyzes how corporate ontologies, centralized semantic layers, and knowledge graphs provide 
+a reliable foundation for business analytics and AI agents. 
+Finally, it outlines the governance processes and organizational changes needed to support this system, focusing on metadata management, the role of Data \& AI Champions, 
+and the reorganization of the corporate Data Office.
+
+%----------------------------------------------------------------------------------------
+% SECTION 4.1
+%----------------------------------------------------------------------------------------
+
+\section[The Data Product Paradigm]{The Data Product Paradigm: Treating Data as a Governed Asset}
+\label{sec:data_product_paradigm}
+
+In traditional enterprise architectures, data is often treated as a simple byproduct of daily operations---transactional records generated to support routine tasks and then 
+loaded into centralized data warehouses or data lakes. In this setup, downstream analytical teams are left with the task of cleaning, reconciling, and interpreting information 
+long after it was created. To address the misalignment between data generation and business consumption, this thesis adopts the Data Product paradigm, a core concept of the 
+decentralized Data Mesh framework introduced by Dehghani \cite{dehghani2022data}. In this approach, data is no longer handled as passive operational output; 
+instead, it is treated as an independent asset owned by business domains, managed with clear lifecycles, defined quality standards, and consumer-focused design. 
+A Data Product includes not only the data itself, but also the transformation code, metadata, access rules, and automated tests needed to make it discoverable, accessible, 
+and usable across the enterprise \cite{dehghani2022data}.
+
+In practice, this approach relies on establishing formal Data Contracts and explicit Service Level Agreements (SLAs) between business domains. 
+Historically, enterprise IT systems reflect a divide between transactional platforms---managed by the Chief Information Officer (CIO) and focused on operational speed, 
+system reliability, and transactional integrity---and analytical platforms, managed by the Chief Data Officer (CDO) to support reporting, forecasting, and machine learning. 
+A Data Contract acts as a clear technical agreement designed to manage this difference. 
+Instead of allowing data issues to travel downstream into analytical models, the contract defines schema rules, data types, quality limits, and change-management rules 
+directly at the source. In this way, data quality shifts from an expensive downstream cleaning task to an architectural requirement enforced from the beginning.
+
+Across an integrated enterprise, this product-oriented model creates clear domain ownership and operational responsibility. In conventional pipelines, 
+upstream schema updates or changes to business logic often happen without notice, causing downstream models and reports to fail or report incorrect numbers. 
+By packaging data assets as governed Data Products backed by contracts, the enterprise removes this vulnerability. Data producers become directly responsible for schema stability, 
+clear definitions, and reliable delivery. Downstream analytical users can then rely on certified, version-controlled interfaces that decouple operational systems from strategic 
+decision-support tools, reducing maintenance overhead and increasing trust in shared corporate data.
+
+%----------------------------------------------------------------------------------------
+% SECTION 4.2
+%----------------------------------------------------------------------------------------
+
+\section[Conceptual Alignment]{Conceptual Alignment: Business Glossary and Ontological Modeling}
+\label{sec:business_glossary_ontology}
+
+Before an organization can design stable data systems or automate analytical workflows, it must establish clear common definitions across its departments. 
+In large companies, different departments naturally develop their own terms, leading to confusion and misunderstandings. Different business units often use the exact 
+same word to describe different things, or use different words for the exact same object. 
+According to the governance standards in the \textit{DAMA Guide to the Data Management Body of Knowledge} \cite{dama2024dmbok}, setting up a centralized Business Glossary 
+is the standard first step to solve this problem. The Business Glossary works as an enterprise-wide reference that collects approved definitions, clarifies terminology, 
+and assigns explicit data owners across business functions \cite{dama2024dmbok}.
+
+However, while a Business Glossary provides clear documentation for human users, a static text dictionary cannot be executed programmatically or used to guide autonomous 
+artificial intelligence agents. To enable automated analysis and reliable queries, the enterprise model needs to evolve from a descriptive glossary into a formal, 
+machine-readable ontology. 
+In information systems research, an ontology is defined as ``a formal, explicit specification of a shared conceptualization'' \cite{gruber1993translation, noy2001ontology}, 
+providing a structured framework that machines can process. Unlike a simple glossary, an ontology defines not just business entities and their attributes, 
+but also the mathematical, hierarchical, and logical rules connecting them, including class inheritance, functional dependencies, and cardinality constraints.
+
+As literature on data systems shows, database structures and classification rules are never neutral; they reflect design choices and operational limits that determine 
+what information is recorded and what is omitted \cite{bowker1999sorting, kitchin2014data}. 
+This explains why formal ontological modeling is particularly useful for an integrated agri-food company like Amadori, where standard relational databases and ERP tables 
+struggle to represent the complex, time-dependent nature of biological supply chains.
+Within Amadori, critical business knowledge has often remained spread across separate operational tools, local spreadsheets, and implicit employee expertise. 
+Introducing an enterprise ontology helps the company organize these complex relationships into a unified, computable model. 
+
+By organizing these domain rules into a computable structure, the proposed ontology helps bridge the gap between daily operations and corporate analytics. 
+Instead of requiring human planners or AI tools to navigate complex relational tables with obscure column names, an ontology provides a verified semantic baseline. 
+Connecting analytical tools and Large Language Model (LLM) agents to this formal structure ensures that automated queries keep the right business context, 
+follow operational rules, and avoid the misunderstandings that often occur in complex industrial environments \cite{bowker1999sorting, hilger2026bridging}.
+
+%----------------------------------------------------------------------------------------
+% SECTION 4.3
+%----------------------------------------------------------------------------------------
+
+\section[The Semantic Layer]{The Semantic Layer: Metric Governance and Decoupled Consumption}
+\label{sec:semantic_layer}
+
+While the Business Glossary and corporate ontology establish the conceptual model of enterprise knowledge, the Semantic Layer is the technical component that translates these 
+definitions into live, executable queries. It is designed to prevent conflicting definitions and metric discrepancies across different tools. 
+In conventional analytical systems, business logic---such as the formulas for promotional uplifts, customer groupings, or baseline sales allocations---is usually scattered 
+across individual SQL queries, data transformations, and local reporting dashboards. The Semantic Layer resolves this issue by implementing the abstract definitions 
+of the ontology as a centralized, standardized layer placed between physical databases and downstream user interfaces. 
+As shown by Hilger, Tesfaye, and Wahl \cite{hilger2026bridging}, this layer acts as the practical link that turns conceptual models into usable analytical tools.
+
+The core principle of the Semantic Layer is the complete separation of raw data storage from business calculation rules. While cloud data platforms and operational systems 
+handle storage optimization, data ingestion, and database performance under the IT team's care, the responsibility for defining and validating business metrics 
+belongs to the semantic model. By mapping physical database tables and joins into standardized, user-facing business entities, the Semantic Layer creates an enterprise 
+single source of truth that shields downstream tools from changes in underlying databases. As Potturi \cite{potturi2025demystifying} notes, 
+this architecture establishes a clear data contract between engineering teams and business users, balancing central governance with flexible self-service analysis. 
+In this architecture, a business metric is defined only once in the central repository, ensuring that every user or service---whether an operational dashboard, 
+a management report, or an analytical model---runs the exact same calculation.
+
+For an integrated manufacturing company like Amadori, a centralized Semantic Layer provides an effective way to resolve discrepancies between high-level sales plans 
+and detailed plant operations. In typical operational setups, aligning commercial goals with production limits often requires manual calculations in offline spreadsheets. 
+Implementing a Semantic Layer lets the enterprise bring these business rules together into centralized, version-controlled definitions. This shared logic guarantees that 
+simulations and operational checks always use identical numbers, regardless of which tool or department runs the query.
+
+Furthermore, the Semantic Layer improves how users and automated systems interact with data by translating business terms into database queries. By hiding complex SQL 
+syntax behind clear business metrics, it makes data exploration practical for non-technical domain users. 
+As highlighted by Gartner (Richardson et al., 2021) \cite{gartner2021magic}, business intelligence is shifting away from static reports toward interactive tools 
+where automated systems and natural language interfaces assist decision-makers. 
+Connecting Natural Language Querying (NLQ) and Large Language Model agents to a certified Semantic Layer allows planners to explore connected data domains using normal 
+business language \cite{potturi2025demystifying}. Because the AI agent works with verified metric definitions rather than writing raw SQL over complex tables, 
+the Semantic Layer acts as a safeguard that prevents calculation errors and hallucinated results, supporting reliable decisions \cite{hilger2026bridging}.
+
+%----------------------------------------------------------------------------------------
+% SECTION 4.4
+%----------------------------------------------------------------------------------------
+
+\section[Enterprise Knowledge Graphs]{Enterprise Knowledge Graphs: From Abstract Models to Actionable Networks}
+\label{sec:knowledge_graphs}
+
+While an ontology defines the general structure and logical rules of a business domain, an enterprise Knowledge Graph is the practical network populated with actual 
+enterprise records \cite{hogan2021knowledge}. In semantic modeling, the ontology defines the overall schema, while the Knowledge Graph fills this schema with real 
+operational data and connections. In conventional relational databases, data is split across normalized tables, requiring complex and rigid table joins to track multi-step 
+business activities. 
+A Knowledge Graph addresses this challenge by organizing company data as a network of distinct entities (nodes) linked by explicit relationships (edges), 
+making it straightforward to navigate connections, run semantic queries, and trace dependencies \cite{hogan2021knowledge}.
+
+In an integrated supply chain like Amadori's, operational decisions involve interconnected factors that link customer demand, production limits, and raw material availability. 
+In traditional systems, evaluating how a change in commercial demand affects production lines requires combining data from different transactional tools, local databases, 
+and manual planning tables. Introducing an enterprise Knowledge Graph allows the company to turn its conceptual ontology into an interconnected, queryable network. 
+In this structure, commercial demand, daily production schedules, and physical plant assets are linked by explicit relationships. 
+This graph model captures the end-to-end operational flow of the business, enabling complete traceability without trying to force complex operational paths into flat database tables.
+
+This graph-based approach also provides a reliable structure for modern artificial intelligence interfaces. 
+In typical generative AI setups, system knowledge is added through standard Retrieval-Augmented Generation (RAG), which cuts text documents into small chunks and finds 
+information using simple text similarity \cite{lewis2020retrieval}. While effective for answering simple questions from documents, standard RAG struggles 
+with multi-step reasoning or following chains of dependencies across different business systems \cite{edge2024local}. 
+Because text searches do not understand structured relationships, large language models can easily invent links or jump to false conclusions when connecting separate enterprise domains.
+
+Graph-Augmented Retrieval (GraphRAG) solves this problem by connecting vector searches to the explicit paths of the Knowledge Graph \cite{edge2024local, hogan2021knowledge}. 
+Instead of retrieving disconnected text snippets, GraphRAG follows verified relationships in the graph to find connected subgraphs directly related to the user's question. 
+Giving the generative model this explicit, verified network of operational facts gives it the solid context needed for complex reasoning \cite{hilger2026bridging}. 
+This allows business planners to ask questions about the supply chain in natural language, confident that the AI agent follows real enterprise connections rather than 
+guessing relationships based on statistical patterns.
+
+%----------------------------------------------------------------------------------------
+% SECTION 4.5
+%----------------------------------------------------------------------------------------
+
+\section[Active Metadata Management]{Active Metadata Management: Lineage, Traceability, and Quality Assurance}
+\label{sec:metadata_management}
+
+In an architecture using decentralized Data Products, formal ontologies, and semantic layers, metadata is no longer just static documentation; 
+it becomes an active operational tool for governance and system reliability. Enterprise architectures are always evolving: underlying database tables, ERP settings, 
+and calculation formulas change regularly to match new business procedures and operational needs. 
+Without a centralized, active metadata system, an organization builds up technical debt. When that happens, analytical applications and forecasting pipelines 
+often fail or report inaccurate results because upstream operational systems changed a column name, data type, or business category without informing downstream teams. 
+Under the standards established in the \textit{DAMA Guide to the Data Management Body of Knowledge} \cite{dama2024dmbok}, modern data governance requires moving from passive 
+documentation files to active metadata management, where metadata is continuously updated, tracked, and used to run data processes automatically.
+
+The need for systematic metadata management stems from the basic challenges of reusing operational records for analytical purposes. 
+As Christine Borgman \cite{borgman2015big} points out, data recorded for routine operational tasks is rarely ready for analytical analysis without careful cleaning and context. 
+This problem is also examined by Sabina Leonelli \cite{Leonelli2016data} in her work on data journeys, which explains that when data moves across departmental or technical boundaries, 
+it loses the background, assumptions, and practical constraints under which it was recorded. 
+To avoid wrong analytical conclusions, data moving from operational tools to planning platforms must include clear metadata describing where it came from, 
+how often it is updated, what rules it follows, and any exceptions present when it was recorded \cite{borgman2015big, Leonelli2016data}.
+Under the proposed framework, an automated data catalog regularly inspects company pipelines, building an end-to-end data lineage that traces physical sources through 
+the Semantic Layer down to dashboards and AI interfaces. When a schema change or calculation update occurs in an upstream system, the metadata platform automatically 
+checks for downstream impacts, alerting data owners and preventing unexpected breaks in planning applications.
+
+This automated lineage tracking ensures that data quality is monitored at the source rather than fixed later when problems appear in final reports. 
+Ultimately, by maintaining a reliable record of where data originates, how it changes, and how it is classified, active metadata management builds trust in enterprise data. 
+It ensures that both human planners and conversational AI systems can read, understand, and use corporate information with complete visibility \cite{borgman2015big, dama2024dmbok}.
+
+%----------------------------------------------------------------------------------------
+% SECTION 4.6
+%----------------------------------------------------------------------------------------
+
+\section[Organizational Transformation]{Organizational Transformation: The Modern Data Office and Data \& AI Champions}
+\label{sec:organizational_transformation}
+
+Introducing decentralized Data Products, centralized semantic models, and conversational AI tools cannot succeed through technical tools alone. 
+As enterprise research on analytics shows, technical changes must be supported by practical organizational changes and clear roles if an organization wants to get lasting value 
+from its data \cite{davenport2017competing}. 
+In traditional organizations, a clear gap often separates technical engineering teams from business decision-makers. 
+Data engineers understand database design, cloud systems, and pipeline architecture, but they rarely know the day-to-day business routines and commercial trade-offs 
+that give meaning to corporate data. On the other hand, business planners know their daily operations thoroughly, but lack the technical background needed to turn their 
+analytical questions into precise software specifications.
+
+To bridge this operational gap, the proposed architecture introduces the role of Data \& AI Champions. These individuals act as practical coordinators working directly 
+between business departments and data engineering teams. Following the organizational knowledge concepts described by Nonaka and Takeuchi \cite{nonaka1995knowledge}, 
+the main role of these champions is to take the practical, hands-on experience of operational staff---the tacit knowledge---and turn it into clear, documented rules
+---the explicit knowledge. Rather than working solely as data engineers or purely as business planners, Data \& AI Champions understand both sides: 
+they know commercial and operational goals, and can translate them into formal data contracts, standard metrics, and ontology relationships. 
+They also help colleagues adopt conversational AI tools, helping planners move from reading static reports to asking specific analytical questions and evaluating automated 
+answers critically.
+
+This operational bridge is supported by a reorganization of the corporate Data Office itself. 
+Historically, company data teams worked as a simple support unit inside the IT department under the Chief Information Officer, acting as a help desk responsible 
+for writing custom SQL queries and building individual reports on request. 
+This older approach inevitably creates an operational bottleneck: whenever business planners need a new metric or an exploratory scenario, 
+they have to submit a support ticket to a long IT backlog, delaying decisions.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Separation of Responsibilities Between Technical Systems and Semantic Governance}
+\label{tab:governance_responsibilities}
+\begin{tabular}{p{3.2cm} p{5.5cm} p{5.5cm}}
+\hline
+\textbf{Dimension} & \textbf{Technical Custody (CIO Core)} & \textbf{Semantic Governance (CDO Core)} \\ \hline
+\textbf{Primary Objective} & Transactional execution, data storage, schema enforcement, and operational performance. & Metric validation, standardized definitions, and strategic decision support. \\ 
+\textbf{Core Accountability} & System uptime, infrastructure stability, network security, and database backups. & Consistent definitions, Data Contract compliance, data lineage, and model accuracy. \\ 
+\textbf{Governed Layer} & Physical tables, relational databases, system indexes, and transactional logs. & Business glossaries, corporate ontologies, Data Contracts, and standardized metrics. \\ \hline
+\end{tabular}
+\end{table}
+
+Under the proposed model, the Data Office led by the Chief Data Officer shifts from a service team that simply builds reports to a governance team that verifies and approves standards. 
+Instead of creating individual dashboards manually, the reorganized Data Office defines, maintains, and approves the enterprise Business Glossary, the formal ontology, 
+and the calculation rules in the Semantic Layer. 
+As summarized in \Cref{tab:governance_responsibilities}, hardware management, database performance, and cloud systems stay under the technical care of the CIO, 
+while consistent definitions, metric certification, and Data Contract oversight are managed by the CDO. 
+By moving from manual report building to managing shared semantic assets, this organizational model removes technical bottlenecks. 
+It allows business teams, supported by their champions, to safely explore certified Data Products, while AI agents work with a verified, structured representation of 
+enterprise operations \cite{davenport2017competing, dehghani2022data}.

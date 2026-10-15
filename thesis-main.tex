@@ -1,0 +1,54 @@
+\documentclass[12pt,a4paper,openright,twoside]{book}
+\usepackage[utf8]{inputenc} 
+
+\newcommand{\thesislang}{english} 
+\usepackage{thesis-style}
+
+\includeonly{chapters/techstack}
+
+\begin{document}
+	
+\frontmatter
+
+%\input{front.tex}
+
+%\begin{abstract}	
+%Max 2000 characters, strict.
+%\end{abstract}
+
+%\begin{dedication} % this is optional
+%Optional. Max a few lines.
+%\end{dedication}
+
+%\begin{acknowledgements} % this is optional
+%Optional. Max 1 page.
+%\end{acknowledgements}
+
+%----------------------------------------------------------------------------------------
+%\tableofcontents   
+%\listoffigures     % (optional) comment if empty
+%\lstlistoflistings % (optional) comment if empty
+%----------------------------------------------------------------------------------------
+
+\mainmatter
+
+%----------------------------------------------------------------------------------------
+\include{chapters/introduction}
+\include{chapters/context}
+\include{chapters/demand}
+\include{chapters/architecture}
+\include{chapters/techstack}
+\include{chapters/materialplanning}
+\include{chapters/chatbot}
+\include{chapters/conclusions}
+
+%----------------------------------------------------------------------------------------
+% BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+%\nocite{*} % uncomment this to show all the reference in the .bib file
+\bibliographystyle{plain}
+\bibliography{bibliography}
+
+
+\end{document}

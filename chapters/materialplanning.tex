@@ -1,0 +1,63 @@
+%----------------------------------------------------------------------------------------
+\chapter{Case Study: Material Planning and Simulation}
+\label{chap:casestudy}
+\chaptermark{Case Study}
+%----------------------------------------------------------------------------------------
+\section[The Bill of Materials Explosion]{Translating the Forecast into Material Requirements: The Bill of Materials Explosion}
+
+During my professional experience within the Data Office of Amadori S.p.A., the core of my activity focused on designing, developing, and engineering an automated calculation engine on the new Cloud Data Platform to translate commercial demand into gross requirements for ingredients and packaging %[cite: 1, 2]. 
+In this analytical role, I was tasked with converting forecasting vectors and operational plans into structured warehouse and purchasing streams, effectively overcoming the historical limitations of an inventory planning approach traditionally guided by the empirical experience of individual planners %[cite: 1]. 
+Although the scope of this initial implementation phase was strictly confined to gross requirements (\textit{fabbisogno lordo})—intentionally leaving inventory stock levels and net requirements (\textit{fabbisogno netto}) out of scope to safeguard the computational stability of the platform % [cite: 1, 2]—
+the algorithm I engineered established the mathematical foundations for executing recursive, large-scale Bill of Materials (BOM) explosions %[cite: 1].
+
+To manage the inherent operational volatility, I structured the core calculation matrix by orchestrating three distinct data velocities and time horizons, separated by sharp boundaries without any overlap %[cite: 1]:
+\begin{itemize}
+    \item \textbf{0–10 Days Horizon (Production Plan):} I configured the daily ingestion of the rolling Production Plan (\textit{Piano di Produzione}), operating at a strict daily granularity %[cite: 1, 2]. 
+    To handle the highly dynamic nature of rolling schedules, I refactored the original technical logic by introducing a global dynamic threshold %[cite: 2]. 
+    Using Python, the system calculates the maximum date (\texttt{MAX}) available in the production plan dataset %[cite: 2]; 
+    the production plan governs all calculations up to this dynamic boundary, after which the sales forecast automatically takes over on the subsequent day %[cite: 2].
+    \item \textbf{10 Days–10 Weeks Horizon (Sales Forecast):} I integrated the unconstrained sales forecasts, expressed directly in crates, harvested from the Board corporate planning platform, establishing it as the sole source of truth for medium-term demand planning %[cite: 1, 2].
+    \item \textbf{Beyond 10 Weeks Horizon (Budget):} I managed the ingestion of the long-term commercial budget, which is natively expressed in kilograms within the Data Warehouse %[cite: 1, 2]. 
+    I implemented a chain of relational database joins to map these macro-volumes back to their respective sales platforms %[cite: 1, 2], 
+    subsequently applying conversion factors from the JDE \texttt{F41002} table to transform raw kilograms into standard corporate crates %[cite: 1, 2].
+\end{itemize}
+
+The most sophisticated software engineering challenge I faced involved modeling the company's distinct product taxonomy, which categorizes items into Finished Products on the Line (\textit{Prodotto Finito in Linea} — PFL), Neutral Products (\textit{Prodotto Neutro} — PN), and Finished Products from Neutral (\textit{Prodotto Finito con Neutro} — PFN) %[cite: 1]. 
+While a PFL item maps directly to a complete, single-level BOM containing all ingredients, primary packaging, and commercial labels %[cite: 1], 
+a PFN represents a commercial variant where a generic, "naked" physical body (the parent PN) is married to a customer-specific label %[cite: 1]. 
+To handle this, I developed a hybrid explosion logic within the Pandas data pipeline to prevent systemic under-allocation %[cite: 1, 2]:
+
+Within the 0–10 days operational window, the physical body of the product must follow the PN production plan, whereas the specific label must follow the PFN sales forecast %[cite: 1]. 
+I wrote an algorithm that isolates the first 10 days of sales forecasts to compute the exact percentage incidence of each individual PFN child relative to its aggregate parent PN volume %[cite: 1, 2]. 
+This calculated allocation ratio was then programmatically applied to the total crates specified in the PN production plan to dynamically derive the gross requirement for specific labels %[cite: 1]. 
+Furthermore, to simultaneously calculate both the primary packaging (tied to the parent PN) and the commercial labeling (tied to the child PFN), I implemented a data duplication step within the script %[cite: 2]. 
+For every PFN record, the pipeline generates a dual row, forcing the substitution of the child item code with the parent PN code %[cite: 2]. 
+This architecture guarantees that primary packaging components and raw ingredients are never ignored or diluted during final material aggregation %[cite: 2].
+
+\section[Delimiting the Analysis Perimeter]{Abstraction from the Real Project: Delimiting the Analysis Perimeter}
+
+A crucial phase of my research involved defining the project boundaries (\textit{scoping}). Operating within a highly integrated agri-food supply chain requires a strong capacity for abstraction, isolating core architectural principles from localized data anomalies or unstandardized operational exceptions. To ensure a successful proof-of-concept on the cloud data infrastructure, I collaborated closely with the Supply Chain department to establish a tightly controlled perimeter for both product categories and algorithmic depth %[cite: 1, 2].
+
+First, the entire dataset and the executing SQL queries were strictly filtered to isolate the turkey processing line (\textit{linea tacchino}), identified within the JDE and Data Warehouse systems by MPS family and line codes \texttt{C05} and \texttt{C06} %[cite: 2]. 
+This focus allowed us to validate the core logic of the calculation engine on a high-rotation, promotion-heavy product category, leaving the integration of other livestock lines to subsequent deployment phases.
+
+Second, I established a clear methodological separation between packaging items (\textit{imballi}) and raw ingredients (\textit{ingredienti}) %[cite: 1, 2]. 
+The enterprise architecture maps packaging items (plastic films, trays, boxes, labels) as first-level components in the JDE \texttt{F3002} table, enabling a flat, direct single-level explosion from the finished or neutral product code straight to the material code %[cite: 1, 2]. 
+Conversely, raw ingredients (spices, breading, marinades) follow a complex multi-level recursive tree structure that can reach up to 9 layers of depth, often nesting inside intermediate semi-finished products like base meat batters or localized seasoning blocks %[cite: 1]. 
+
+In formalizing the technical analysis, I demonstrated that recursively exploding down to the lowest leaf node is not always operationally sound %[cite: 1]. 
+Certain intermediate semi-finished components (such as specialized meat bases) are managed as autonomous inventory layers with separate production flows, meaning they require a strict stop rule to halt recursion and prevent material duplication %[cite: 1]. 
+Consequently, the multi-level ingredient explosion was classified as an open analytical point %[cite: 1, 2]. 
+I restricted the active execution code of the engine to the flat, deterministic explosion of primary packaging and commercial labels %[cite: 2]. 
+This pragmatic approach protected the development cycle from project stagnation, while successfully mappen the logistical redirection of material requirements from sales platforms back to the physical production depots (\textit{deposito di produzione})—the primary dimension of the final corporate output %[cite: 1, 2].
+
+\section[Transparent Substitution of the Data Product]{Transparent Substitution of the Data Product: The Agility of the Semantic Layer}
+
+The most significant strategic conclusion drawn from this use case is the practical demonstration of how a centralized Semantic Layer effectively decouples predictive intelligence from downstream execution workflows. In legacy architectures, the output of a demand forecasting model is traditionally tightly coupled to the physical tables of specific relational databases or legacy database packages. Any modification to the forecasting algorithm or a change in model hyperparameters required a massive rewriting of downstream integration logic, causing severe operational latency and business friction.
+
+By adopting the Data Product paradigm and centralizing business logic within a version-controlled LookML layer, I validated a scenario of \textit{transparent substitution} for the predictive engine. In the framework we implemented, the statistical forecasting model (such as the ARIMAX engine detailed in Chapter 3) and the material planning engine function as completely isolated computational microservices. They interact solely by publishing their outputs into the cloud Lakehouse as independent Data Products protected by explicit data contracts.
+
+The Semantic Layer acts as an un-bypassable abstraction layer and a universal data interface. Should the enterprise choose to upgrade its current R-based ARIMAX model to a deep learning architecture, or alter the ingestion logic of its sales forecasts to incorporate dynamic coverage rules %[cite: 1, 2], 
+the entire downstream consumption environment remains completely unaffected. The procurement dashboards, logistics scheduling systems, and inventory planning interfaces continue to query the exact same predefined semantic dimensions (such as \texttt{organic\_baseline\_volume} or \texttt{promotional\_uplift\_volume}), remaining entirely blind to the underlying algorithmic modifications or software engineering shifts. 
+
+This abstraction minimizes the time-to-market for deploying analytical innovations within the Data Office, while creating the ideal environment for the secure integration of Generative AI. Because the LLM Agent interacts exclusively with the certified objects of the Semantic Layer, any transparent substitution of the underlying predictive models occurs invisibly to the conversational user interface. The AI agent continues to retrieve mathematically validated numbers and support cross-functional supply chain simulations, ensuring seamless continuity in corporate knowledge governance within a hyper-volatile market.
