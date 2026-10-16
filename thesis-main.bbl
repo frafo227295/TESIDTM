@@ -38,12 +38,35 @@ Zhamak Dehghani.
 \newblock {\em Data Mesh: Delivering Data-Driven Value at Scale}.
 \newblock O'Reilly Media, Sebastopol, CA, 2022.
 
+\bibitem{devoteam2026looker}
+Devoteam.
+\newblock Conversational analytics in looker: Architecture, guardrails, and
+  implementation, 2026.
+\newblock Accessed: 2026-10-15.
+
 \bibitem{edge2024local}
 Darren Edge, Ha~Trinh, Aidan Newman, Joshua Christopher, Andrew Evans, Shenghao
   Wang, Kevin Larson, Robert Foster, Kyle Bennett, Scott Jones, et~al.
 \newblock From local to global: A graph rag approach to query-focused
   summarization.
 \newblock {\em arXiv preprint arXiv:2404.16130}, 2024.
+
+\bibitem{googlecloudlookerca2024}
+{Google Cloud}.
+\newblock Best practices for configuring conversational analytics and ai agents
+  in looker, 2024.
+\newblock Accessed: 2026-10-15.
+
+\bibitem{googlecloudlookerbp2024}
+{Google Cloud}.
+\newblock Lookml and explore best practices for high-performance queries, 2024.
+\newblock Accessed: 2026-10-15.
+
+\bibitem{googlecloudlookeragents2026}
+{Google Cloud}.
+\newblock Create and manage explore data agents in looker conversational
+  analytics, 2026.
+\newblock Accessed: 2026-10-15.
 
 \bibitem{gruber1993translation}
 Thomas~R. Gruber.
