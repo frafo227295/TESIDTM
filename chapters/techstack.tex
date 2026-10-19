@@ -147,9 +147,13 @@ view: f_material_planning {
 }
 \end{lstlisting}
 
-In this view, technical surrogate keys (\texttt{art\_id}, \texttt{mat\_id}, \texttt{ptf\_id}) and raw numeric dates are suppressed from user visibility using \texttt{hidden: yes}. Instead, the view exposes a clean \texttt{dimension\_group} parsing the integer date into standard calendar intervals. Business measures—such as \texttt{fabbisogno\_materiale}—incorporate pre-configured \texttt{drill\_fields}, enabling users to click on any aggregated volume to immediately inspect the underlying constituent articles and material classifications.
+In this view, technical surrogate keys (\texttt{art\_id}, \texttt{mat\_id}, \texttt{ptf\_id}) and raw numeric dates are suppressed from user visibility using 
+\texttt{hidden: yes}. Instead, the view exposes a clean \texttt{dimension\_group} parsing the integer date into standard calendar intervals. 
+Business measures—such as \texttt{fabbisogno\_materiale}—incorporate pre-configured \texttt{drill\_fields}, enabling users to click on any aggregated volume to 
+immediately inspect the underlying constituent articles and material classifications.
 
-Master data views follow the same design. In \texttt{l\_art\_jde}, physical columns are enriched to dynamically distinguish between parent finished items, neutral items (\textit{PN}), and material components:
+Master data views follow the same design. In \texttt{l\_art\_jde}, physical columns are enriched to dynamically distinguish between parent finished items, 
+neutral items (\textit{PN}), and material components:
 
 \begin{lstlisting}[language=SQL, caption={LookML Master Data View with Derived Categorization}, label={lst:lookml_master}]
 view: l_art_jde {
@@ -180,7 +184,8 @@ view: l_art_jde {
 \end{lstlisting}
 
 \subsection{Model Definition: Relational Joins and Access Perimeter}
-The relational orchestration of the Material Planning domain is codified within the LookML model file (\texttt{material\_planning.model.lkml}). The model specifies the active database connection, imports the view definitions, and defines the join topology centered around the primary fact view:
+The relational orchestration of the Material Planning domain is codified within the LookML model file (\texttt{material\_planning.model.lkml}). 
+The model specifies the active database connection, imports the view definitions, and defines the join topology centered around the primary fact view:
 
 \begin{lstlisting}[language=SQL, caption={LookML Model and Explore Configuration for Material Planning}, label={lst:lookml_model}]
 connection: "materialplanningbq"
@@ -240,19 +245,33 @@ explore: f_material_planning {
 }
 \end{lstlisting}
 
-As demonstrated in Listing~\ref{lst:lookml_model}, the Explore implements a role-playing dimension by joining the master table \texttt{l\_art\_jde} twice under two distinct semantic contexts: once as \texttt{articolo} (representing the finished commercial product generating demand) and once as \texttt{materiale} (representing the physical packaging or ingredient consumed). Furthermore, by explicitly filtering exposed attributes via the \texttt{fields} parameter, the model guarantees that only certified dimensions reach the analytical and conversational interfaces.
+As demonstrated in Listing~\ref{lst:lookml_model}, the Explore implements a role-playing dimension by joining the master table \texttt{l\_art\_jde} 
+twice under two distinct semantic contexts: once as \texttt{articolo} (representing the finished commercial product generating demand) and once as 
+\texttt{materiale} (representing the physical packaging or ingredient consumed). Furthermore, by explicitly filtering exposed attributes via the \texttt{fields} parameter, 
+the model guarantees that only certified dimensions reach the analytical and conversational interfaces.
 
 \subsection{Semantic Modeling for Self-Service Exploration and AI Enablement}
 The enrichment of LookML parameters serves two interdependent consumption modes: human self-service analytics and cognitive AI agents.
 
-For corporate planners, the centralized Explore defines certified relational joins across logistics platforms (\texttt{l\_ptf}), units of measure (\texttt{l\_um}), production lines (\texttt{l\_lin}), and the dual aliases of \texttt{l\_art\_jde} (mapped once as the parent \textit{Articolo} and once as the dependent \textit{Materiale}). This semantic foundation enables intuitive self-service BI: business users can build ad-hoc operational queries in the Explore interface, save customized views (\textit{Looks}), and combine them into interactive, cross-filtered dashboards without writing SQL code.
+For corporate planners, the centralized Explore defines certified relational joins across logistics platforms (\texttt{l\_ptf}), units of measure (\texttt{l\_um}), 
+production lines (\texttt{l\_lin}), and the dual aliases of \texttt{l\_art\_jde} (mapped once as the parent \textit{Articolo} and once as the dependent \textit{Materiale}). 
+This semantic foundation enables intuitive self-service BI: business users can build ad-hoc operational queries in the Explore interface, save customized views 
+(\textit{Looks}), and combine them into interactive, cross-filtered dashboards without writing SQL code.
 
 Simultaneously, this enriched metadata provides the deterministic guardrails required for autonomous Generative AI agents \cite{googlecloudlookerca2024}:
 \begin{itemize}
-    \item \textbf{Vocabulary Disambiguation via Synonyms:} Natural language queries rarely match exact database column names. The \texttt{synonyms} parameter maps common enterprise jargon, informal acronyms (e.g., "PFL", "PFN", "deposito"), and domain terms directly to validated LookML dimensions, allowing an AI agent to match user intent with deterministic schema fields.
-    \item \textbf{Semantic Anchoring via Descriptions:} The \texttt{description} parameter defines the exact operational scope and mathematical logic of each metric. This metadata prevents language models from misinterpreting raw values or fabricating fictitious aggregation logic.
-    \item \textbf{Context Pruning via Hidden Fields:} By hiding raw IDs and technical join keys (\texttt{hidden: yes}), the Semantic Layer filters out noise from the agent's context window. The LLM evaluates only certified, business-relevant fields, substantially reducing prompt token consumption and preventing hallucinated joins \cite{googlecloudlookerca2024}.
+    \item \textbf{Vocabulary Disambiguation via Synonyms:} Natural language queries rarely match exact database column names. The \texttt{synonyms} parameter maps 
+    common enterprise jargon, informal acronyms (e.g., "PFL", "PFN", "deposito"), and domain terms directly to validated LookML dimensions, allowing an AI agent to match 
+    user intent with deterministic schema fields.
+    \item \textbf{Semantic Anchoring via Descriptions:} The \texttt{description} parameter defines the exact operational scope and mathematical logic of each metric. 
+    This metadata prevents language models from misinterpreting raw values or fabricating fictitious aggregation logic.
+    \item \textbf{Context Pruning via Hidden Fields:} By hiding raw IDs and technical join keys (\texttt{hidden: yes}), the Semantic Layer filters out noise from the 
+    agent's context window. The LLM evaluates only certified, business-relevant fields, substantially reducing prompt token consumption and preventing hallucinated 
+    joins \cite{googlecloudlookerca2024}.
 \end{itemize}
+
+By encapsulating business logic directly within version-controlled modeling files, Looker serves as an auditable, deterministic API. The operational orchestration of 
+this semantic layer with autonomous conversational agents and large language models is formally analyzed and evaluated in \Cref{chap:conversational_agent}.
 
 %----------------------------------------------------------------------------------------
 % SECTION 5.3
@@ -289,63 +308,8 @@ In this target framework, OpenMetadata will ingest metadata programmatically fro
 manual synchronization overhead. This evolutionary enhancement strictly decouples operational query execution (handled in-database by Looker, Oracle, and BigQuery) 
 from systemic metadata governance, completing the structural transition toward enterprise-grade Data Products.
 
-%----------------------------------------------------------------------------------------
-% SECTION 5.4
-%----------------------------------------------------------------------------------------
-
-\section[Conversational AI with Gemini in Looker]{Conversational AI Enablement: Gemini in Looker and Iterative Agent Tuning}
-\label{sec:gemini_looker_agent}
-
-To democratize analytical access for enterprise decision-makers and operational planners, the data platform integrates Google Cloud's native Generative AI capabilities through \textbf{Gemini in Looker}. Rather than querying physical database engines directly with unconstrained text-to-SQL generation—an approach notoriously vulnerable to hallucinated schema joins and non-existent business definitions—the conversational interface is strictly anchored to the certified Semantic Layer \cite{devoteam2026looker, googlecloudlookeragents2026}.
-
-\subsection{Ecosystem Overview: Conversational Modalities in Looker}
-Google Cloud structures natural language analytics in Looker across three specialized conversational modalities:
-\begin{itemize}
-    \item \textbf{Chat with Dashboard:} A conversational assistant anchored to a pre-computed analytical dashboard. It operates exclusively on the rendered visualizations and pre-aggregated tiles, providing immediate qualitative summaries, identifying visual anomalies, and explaining trends without executing ad-hoc database queries.
-    \item \textbf{Chat with Explore:} A contextual assistant embedded within a single Explore interface. It assists technical analysts in constructing ad-hoc visual queries by mapping natural language prompts to available dimensions, measures, and filters within that specific Explore boundary.
-    \item \textbf{Conversational Data Agents (Chat with Your Data):} The enterprise architectural choice implemented in this project. Enabled via Looker Admin and the Conversational Analytics framework, this modality provisions an autonomous agent powered by Gemini that can bind up to five certified Explores \cite{googlecloudlookeragents2026}. For the Amadori material planning use case, the agent connects directly to the \texttt{f\_material\_planning} explore within the \texttt{material\_planning} model, acting as an interactive operational assistant governed by custom domain instructions and LookML metadata.
-\end{itemize}
-
-\subsection{Iterative Tuning Methodology: The "Show Thinking" Feedback Loop}
-In alignment with official engineering guidelines for Looker conversational analytics \cite{googlecloudlookeragents2026}, configuring an enterprise-grade agent is not a static task, but an empirical, iterative engineering workflow. As illustrated in \Cref{fig:agent_tuning_loop}, the tuning process follows a closed feedback loop: executing domain-specific natural language queries, inspecting the model's step-by-step reasoning via the native \textbf{Show Thinking} diagnostic interface, identifying semantic misalignments, and mitigating them either upstream in the LookML model or downstream in the Agent's system instructions.
-
-During validation against real Amadori operational scenarios, this inspection cycle revealed several critical behavioral challenges that were systematically resolved:
-
-\paragraph{1. Lexical and Semantic Disambiguation}
-When testing raw queries such as \textit{"Di quante etichette avrò bisogno il prossimo mese?"}, the agent initially returned null results. Inspecting the \textit{Show Thinking} log revealed that Gemini attempted an unguided string filter:
-\begin{quote}
-\small\texttt{Filtered data for L\_MAT.MAT\_DES with value \%ETICHETTA\%, \%Etichetta\%, \%etichetta\%...}
-\end{quote}
-In the corporate ERP, label descriptions are systematically abbreviated with prefixes such as \texttt{"ET"} or \texttt{"ETICH"}. Rather than relying on trial-and-error, the agent's instructions were enriched with domain syntax rules: \textit{"Le etichette pianificate iniziano con 'Et' o includono 'Etich'"}. Similarly, colloquial terms were mapped to official database terms: requests for \textit{"vaschette"} failed until an instruction established that \textit{"vaschetta"} and \textit{"vassoio"} are exact functional synonyms.
-
-\paragraph{2. Entity Consolidation and Canonical Filtering}
-When querying requirements for regional hubs (e.g., \textit{\"Di cosa avrò bisogno a Santa Sofia fino a fine anno?\"}), the agent stalled, prompting the user for clarification because multiple operational codes map to that geographic hub. To prevent interactive bottlenecks, a deterministic system instruction was introduced: whenever an ambiguous reference to a plant or platform is detected, the agent automatically applies a canonical set filter on the platform code (\texttt{l\_ptf.ptf\_cod} in \texttt{[S01, S02, S04, S05, S10, S50]}).
-
-\paragraph{3. Schema Refactoring: From Code Interpreter to Semantic Dimension}
-A key turning point in the tuning process occurred during requests to separate ingredients from packaging: \textit{"Dividi gli ingredienti dagli imballi"}. In the \textit{Show Thinking} log, Gemini activated its Python-based Code Interpreter, engaging in multi-step heuristic reasoning:
-\begin{quote}
-\small\textit{"Codes starting with '08' seem to correspond to 'Budello' and 'Olio' (ingredients), while codes starting with 'I' or 'IM' correspond to 'Et termica', 'Vassoio', 'Film' (packaging)... I will perform a query and use python\_agent to categorize them..."}
-\end{quote}
-While the agent successfully inferred the correct classification, this runtime heuristic introduced severe response latency. Guided by the principle of pushing logic to the semantic core, this insight was leveraged to permanently enrich the LookML view: a dedicated dimension, \texttt{tipo\_materiale}, was codified with a deterministic \texttt{CASE} statement (Listing~\ref{lst:lookml_master}). This architectural shift eliminated runtime LLM deliberation, transforming an ad-hoc statistical inference into an indexed, reproducible dimensional filter.
-
-\paragraph{4. Code Disambiguation and the "Superset Trap"}
-When prompted with an exact article code (e.g., \textit{"Quanti ingredienti mi servono per l'articolo 00700?"}), the language model exhibited the "superset trap," hesitating and asking whether the user meant \texttt{00700}, \texttt{00700F}, \texttt{100200700}, or \texttt{100700001}. To enforce operational precision, an explicit constraint was codified: \textit{"Se l'utente fornisce un codice, questo deve essere trattato come corrispondenza esatta (EXACT\_MATCH), senza richiedere conferme su codici contenitori se il codice esiste nel database"}.
-
-\paragraph{5. Computational Pruning and Temporal Fallback}
-To avoid massive, unbounded SQL table scans when users omit temporal boundaries, a default fallback instruction was mandated: any query lacking an explicit timeframe automatically defaults to the interval spanning from the current execution date to the end of the subsequent calendar month. This bounds query costs on the database while delivering immediate operational relevance.
-
-\subsection{Architectural Constraints: Heterogeneous Units of Measure and Dashboard Routing}
-A fundamental limitation of LLM-driven conversational interfaces emerged when handling multi-unit aggregations:
-\begin{equation}
-\text{Total Gross Requirement} = \sum \text{Packaging (NR)} + \sum \text{Film (MT)} + \sum \text{Trays (MQ)} + \sum \text{Spices (KG)}
-\end{equation}
-In relational databases, summing numerical values across incompatible Units of Measure (UoM) produces a meaningless aggregate. Furthermore, when users instructed the agent to \textit{"generate separate charts for each unit of measure"}, the agent encountered an architectural constraint: Looker Conversational Agents cannot perform runtime looping to dynamically generate $N$ independent visualization widgets within a single conversational turn. Attempting to execute such requests resulted in a single SQL query being rendered identically across duplicated widgets.
-
-To solve this semantic and visualization challenge, the architecture decouples exploratory conversational dialogue from multi-dimensional structured reporting:
-\begin{enumerate}
-    \item \textbf{Certified LookML Dashboard Deployment:} A dedicated, governed dashboard (\texttt{fabbisogni\_um}) was developed in LookML, featuring four decoupled column tiles, each strictly bound to a single unit of measure (\texttt{MT}, \texttt{MQ}, \texttt{NR}, \texttt{KG}) and controlled by global platform and date filters.
-    \item \textbf{Deterministic Agent Routing via Deep-Linking:} When an incoming user query requests an aggregate volume analysis spanning multiple UoMs, the agent is instructed not to generate a flat chart. Instead, it explains the mathematical necessity of keeping units segregated and dynamically constructs a parameterized, absolute URL pointing to the certified dashboard, pre-populating the URL query string with the user's specific context (e.g., \texttt{?filtro\_citta=S01\&filtro\_periodo=2026-11}).
-    \item \textbf{Sanitization and Enterprise Security Handshake:} During testing, it was observed that Looker's markdown sanitizer suppressed relative dashboard hyperlinks generated by the LLM (rendering an unlinked anchor tag \texttt{<a>} to prevent arbitrary URL injection). To ensure seamless user navigation, the instruction was refined to mandate absolute URLs using the official instance domain, returning the link as plain text with clear instructions for the user to open it in an isolated browser session.
-\end{enumerate}
-
-This hybrid design encapsulates the core philosophy of the proposed data architecture: leveraging Generative AI for intent recognition, lexical routing, and contextual guidance, while delegating complex multi-metric visualization to the deterministic, governed Semantic Layer.
+\bigskip
+In summary, the technological infrastructure deployed at Amadori S.p.A. harmonizes the operational stability of on-premises transactional databases with the analytical 
+elasticity of cloud data warehousing. By establishing Looker as an in-database Semantic Layer, the enterprise enforces the DRY principle across its metric catalog, 
+guarantees granular access governance, and encapsulates complex supply chain definitions within certified LookML models. With the storage infrastructure, relational modeling, 
+and metadata governance roadmap formalized, the subsequent chapter explores how this unified semantic layer enables autonomous conversational analytics through Gemini in Looker.
