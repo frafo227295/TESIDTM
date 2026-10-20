@@ -9,76 +9,108 @@
 \section[Introduction]{Introduction and Business Motivation}
 \label{sec:agent_introduction}
 
-The deployment of centralized data warehouses and semantic modeling frameworks has historically addressed technical consistency and data integrity; however, a critical operational barrier frequently persists at the consumption boundary. In complex supply chain ecosystems such as Amadori S.p.A., operational planners, procurement managers, and plant supervisors require rapid, ad-hoc access to tactical information. Traditionally, extracting answers from enterprise systems mandates either dedicated Business Intelligence proficiencies—such as building custom visual queries within Looker Explores—or submitting ticketing requests to technical data engineering teams, introducing operational latency.
+The deployment of centralized data warehouses and semantic modeling frameworks has historically addressed technical consistency and data integrity; however, 
+a critical operational barrier frequently persists at the consumption boundary. In complex supply chain ecosystems such as Amadori S.p.A., operational planners, 
+procurement managers, and plant supervisors require rapid, ad-hoc access to tactical information. 
+Traditionally, extracting answers from enterprise systems mandates either dedicated Business Intelligence proficiencies—such as building custom visual queries 
 
-To bridge this interaction divide, the target data architecture integrates Google Cloud's Generative AI framework through \textbf{Gemini in Looker}. Rather than treating artificial intelligence as an unconstrained text-to-SQL code generator operating against raw physical tables—an architectural pattern inherently vulnerable to relational hallucinations, uncalibrated aggregations, and data leaks—this implementation strictly anchors conversational interactions to the certified Semantic Layer formalized in \Cref{chap:techstack}. 
+within Looker Explores—or submitting ticketing requests to technical data engineering teams, introducing operational latency.
 
-By restricting the large language model (LLM) to interact exclusively through curated LookML models, views, and explores, the system ensures that every analytical insight generated remains mathematically sound, aligned with certified business logic, and governed by enterprise access controls. This chapter formalizes the operationalization of this conversational paradigm: it provides an architectural taxonomy of Looker's conversational modalities, establishes an iterative engineering methodology grounded in the diagnostic analysis of the model's reasoning (\textit{Show Thinking}), and details the technical solutions deployed to overcome operational ambiguities and interface constraints in Amadori's Material Planning domain.
+To bridge this interaction divide, the target data architecture integrates Google Cloud's Generative AI framework through \textbf{Gemini in Looker}. 
+Rather than treating artificial intelligence as an unconstrained text-to-SQL code generator operating against raw physical tables—an architectural pattern inherently 
+vulnerable to relational hallucinations, uncalibrated aggregations, and data leaks—this implementation strictly anchors conversational interactions to the certified 
+Semantic Layer formalized in \Cref{chap:techstack}. 
+
+By restricting the large language model (LLM) to interact exclusively through curated LookML models, views, and explores, the system ensures that every analytical 
+insight generated remains mathematically sound, aligned with certified business logic, and governed by enterprise access controls. This chapter formalizes the 
+operationalization of this conversational paradigm: it provides an architectural taxonomy of Looker's conversational modalities, establishes an iterative engineering 
+methodology grounded in the diagnostic analysis of the model's reasoning (\textit{Show Thinking}), and details the technical solutions deployed to overcome operational 
+ambiguities and interface constraints in Amadori's Material Planning domain.
 
 \section[Looker Conversational Modalities]{Architectural Framework: Conversational Modalities in Looker}
 \label{sec:conversational_modalities}
 
 Google Cloud structures natural language analytical interactions within Looker across three specialized, tiered modalities \cite{devoteam2026looker, googlecloudlookeragents2026}:
 \begin{enumerate}
-    \item \textbf{Chat with Dashboard:} An analytical assistant tightly bound to a specific pre-configured dashboard. It operates exclusively upon pre-aggregated data rendered within existing visualization tiles, delivering qualitative summaries, identifying obvious visual anomalies, and synthesizing multi-tile relationships without generating or executing underlying SQL queries against the database.
-    \item \textbf{Chat with Explore:} A contextual copilot embedded directly within a single Looker Explore interface. Designed primarily for analytical users, it assists in ad-hoc query synthesis by mapping natural language prompts to valid dimensions, measures, and filter clauses constrained strictly to that individual Explore's schema.
-    \item \textbf{Conversational Data Agents (Chat with Your Data):} The enterprise-grade agentic architecture selected for this thesis project. Provisioned through Looker Admin and the Conversational Analytics framework, this modality instantiates an autonomous conversational agent powered by Gemini capable of orchestrating multi-turn dialogues across up to five certified Explores \cite{googlecloudlookeragents2026}.
+    \item \textbf{Chat with Dashboard:} An analytical assistant tightly bound to a specific pre-configured dashboard. It operates exclusively upon pre-aggregated data 
+    rendered within existing visualization tiles, delivering qualitative summaries, identifying obvious visual anomalies, and synthesizing multi-tile relationships without 
+    generating or executing underlying SQL queries against the database.
+    \item \textbf{Chat with Explore:} A contextual copilot embedded directly within a single Looker Explore interface. Designed primarily for analytical users, it assists in 
+    ad-hoc query synthesis by mapping natural language prompts to valid dimensions, measures, and filter clauses constrained strictly to that individual Explore's schema.
+    \item \textbf{Conversational Data Agents (Chat with Your Data):} The enterprise-grade agentic architecture selected for this thesis project. Provisioned through 
+    Looker Admin and the Conversational Analytics framework, this modality instantiates an autonomous conversational agent powered by Gemini capable of orchestrating 
+    multi-turn dialogues across up to five certified Explores \cite{googlecloudlookeragents2026}.
 \end{enumerate}
 
-In the Amadori Material Planning deployment, the Conversational Data Agent is bound directly to the \texttt{f\_material\_planning} explore within the \texttt{material\_planning} model. The agent functions as an interactive operational planner, interpreting complex domain inquiries, routing user intents to the appropriate semantic attributes, and returning either synthesized textual responses or structured analytical visualizations.
+In the Amadori Material Planning deployment, the Conversational Data Agent is bound directly to the \texttt{material\_planning} explore. 
+The agent functions as an interactive operational planner, interpreting complex domain inquiries, routing user intents to the appropriate semantic attributes, and returning either 
+synthesized textual responses or structured analytical visualizations.
 
 \section[Iterative Tuning Methodology]{Iterative Agent Engineering: The "Show Thinking" Diagnostic Loop}
 \label{sec:tuning_methodology}
 
-In alignment with enterprise guidelines for Looker Explore Data Agents \cite{googlecloudlookeragents2026}, achieving high operational precision requires an empirical, iterative engineering workflow rather than static prompt crafting. The agent's performance was developed through a continuous feedback loop centered on the native \textbf{Show Thinking} diagnostic interface, as illustrated in \Cref{fig:agent_tuning_loop}.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.88\textwidth]{figures/agent_tuning_loop.png}
-    \caption{Iterative Agent Tuning Workflow via "Show Thinking" Log Analysis and LookML Grounding}
-    \label{fig:agent_tuning_loop}
-\end{figure}
+In alignment with enterprise guidelines for Looker Explore Data Agents \cite{googlecloudlookeragents2026}, achieving high operational precision requires an empirical, 
+iterative engineering workflow rather than static prompt crafting. The agent's performance was developed through a continuous feedback loop centered on the native 
+\textbf{Show Thinking} diagnostic interface, as illustrated in \Cref{fig:agent_tuning_loop}.
 
 The optimization lifecycle comprises four synchronized operational phases:
 \begin{enumerate}
-    \item \textbf{Domain Stress Testing:} Submitting realistic, natural language operational inquiries representative of daily supply chain planning dialogues (e.g., requests concerning packaging volumes, plant allocations, and material segregations).
-    \item \textbf{Reasoning Path Inspection (\textit{Show Thinking}):} Examining the step-by-step diagnostic reasoning trace generated by Gemini before query compilation. This inspection reveals how the model parses lexical tokens, identifies where it hesitates between candidate fields, highlights computational latencies induced by code interpreter execution, and uncovers incorrect SQL filtering assumptions.
-    \item \textbf{Root-Cause Bifurcation:} Evaluating whether the performance bottleneck stems from an incomplete semantic model (requiring structural LookML modifications) or from conversational ambiguity (requiring system instruction tuning).
-    \item \textbf{Targeted Remediation and Regression Validation:} Implementing the fix via LookML parameters (\texttt{synonyms}, \texttt{description}, derived dimensions) or Agent System Instructions, followed by regression tests to ensure existing queries remain unaffected.
+    \item \textbf{Domain Stress Testing:} Submitting realistic, natural language operational inquiries representative of daily supply chain planning dialogues 
+    (e.g., requests concerning packaging volumes, plant allocations, and material segregations).
+    \item \textbf{Reasoning Path Inspection (\textit{Show Thinking}):} Examining the step-by-step diagnostic reasoning trace generated by Gemini before query compilation. 
+    This inspection reveals how the model parses lexical tokens, identifies where it hesitates between candidate fields, highlights computational latencies induced by code 
+    interpreter execution, and uncovers incorrect SQL filtering assumptions.
+    \item \textbf{Root-Cause Bifurcation:} Evaluating whether the performance bottleneck stems from an incomplete semantic model (requiring structural LookML modifications) 
+    or from conversational ambiguity (requiring system instruction tuning).
+    \item \textbf{Targeted Remediation and Regression Validation:} Implementing the fix via LookML parameters (\texttt{synonyms}, \texttt{description}, derived dimensions) 
+    or Agent System Instructions, followed by regression tests to ensure existing queries remain unaffected.
 \end{enumerate}
 
 \section[Operational Case Studies]{Resolution of Operational Ambiguities and Domain Challenges}
 \label{sec:operational_cases}
 
-During the validation of the Material Planning agent against live production data, the inspection of \textit{Show Thinking} logs exposed several foundational failure modes. These were systematically mitigated through specific engineering interventions:
+During the validation of the Material Planning agent against live production data, the inspection of \textit{Show Thinking} logs exposed several foundational failure modes. 
+These were systematically mitigated through specific engineering interventions:
 
 \subsection{Lexical and Domain Disambiguation}
-Initial natural language prompts targeting specific packaging materials—such as \textit{"Di quante etichette avrò bisogno il prossimo mese?"}—resulted in complete query failure, with the agent returning null records. 
+Initial natural language prompts targeting specific packaging materials—such as \textit{"Di quante etichette avrò bisogno il prossimo mese?"}—resulted in complete query failure, 
+with the agent returning null records. 
 
 Inspection of the \textit{Show Thinking} log revealed that Gemini attempted an intuitive text pattern match on the material description field:
 \begin{quote}
 \small\texttt{Filtered data for L\_MAT.MAT\_DES with value \%ETICHETTA\%, \%Etichetta\%, \%etichetta\%, \%ETICHETTE\%, \%Etichette\%, \%etichette\%...}
 \end{quote}
-In Amadori's ERP master tables, packaging labels are codified using strict technical abbreviations, predominantly prefixed with \texttt{"ET"} or \texttt{"ETICH"}. To eliminate this mismatch, domain-specific lexical rules were injected into the agent's system instructions: \textit{"Le etichette pianificate iniziano con 'Et' o includono 'Etich'"}. 
+In Amadori's ERP master tables, packaging labels are codified using strict technical abbreviations, predominantly prefixed with \texttt{"ET"} or \texttt{"ETICH"}. 
+To eliminate this mismatch, domain-specific lexical rules were injected into the agent's system instructions: \textit{"Le etichette pianificate iniziano con 'Et' o includono 'Etich'"}. 
 
-Similarly, colloquial enterprise terminology was bridged: operational requests regarding \textit{"vaschette"} consistently triggered clarification prompts because the master table registers the items as \textit{"vassoi"}. An explicit instruction was codified: \textit{"Tratta i termini vaschetta e vassoio come sinonimi"}, enabling deterministic field matching.
+Similarly, colloquial enterprise terminology was bridged: operational requests regarding \textit{"vaschette"} consistently triggered clarification prompts because 
+the master table registers the items as \textit{"vassoi"}. An explicit instruction was codified: \textit{"Tratta i termini vaschetta e vassoio come sinonimi"}, 
+enabling deterministic field matching.
 
 \subsection{Entity Consolidation and Canonical Filtering}
-When querying aggregate requirements across regional manufacturing hubs (e.g., \textit{"Di cosa avrò bisogno a Santa Sofia fino a fine anno?"}), the agent generated conversational friction, asking the user to manually select among multiple physical platform identifiers associated with that municipality. 
+When querying aggregate requirements across regional manufacturing hubs (e.g., \textit{"Di cosa avrò bisogno a Santa Sofia fino a fine anno?"}), the agent generated 
+conversational friction, asking the user to manually select among multiple physical platform identifiers associated with that municipality. 
 
-To eliminate interactive deadlocks, a canonical filtering policy was formalized in the instructions: whenever a generic reference to a manufacturing plant, platform, or deposit is detected, the agent is mandated to apply an exact set filter across the authorized operational platform codes:
+To eliminate interactive deadlocks, a canonical filtering policy was formalized in the instructions: whenever a generic reference to a manufacturing plant, platform, 
+or deposit is detected, the agent is mandated to apply an exact set filter across the authorized operational platform codes:
 \begin{quote}
-\small\textit{"Quando l'utente si riferisce genericamente a uno stabilimento, piattaforma o deposito, applica sempre un filtro su \texttt{l\_ptf.ptf\_cod} utilizzando esclusivamente: S01, S02, S04, S05, S10, S50."}
+\small\textit{"Quando l'utente si riferisce genericamente a uno stabilimento, piattaforma o deposito, applica sempre un filtro su \texttt{l\_ptf.ptf\_cod} utilizzando 
+esclusivamente: S01, S02, S04, S05, S10, S50."}
 \end{quote}
 
 \subsection{Architectural Shift: From LLM Code Interpretation to LookML Dimensions}
-A critical efficiency breakthrough occurred during requests demanding material classification: \textit{"Di cosa ho bisogno a dicembre a Santa Sofia? Dividi gli ingredienti dagli imballi"}. 
+A critical efficiency breakthrough occurred during requests demanding material classification: \textit{"Di cosa ho bisogno a dicembre a Santa Sofia? 
+Dividi gli ingredienti dagli imballi"}. 
 
-While the agent eventually returned an accurate answer, the \textit{Show Thinking} diagnostic revealed severe computational overhead: Gemini invoked its integrated Python Code Interpreter to run inductive heuristics on sample raw codes:
+While the agent eventually returned an accurate answer, the \textit{Show Thinking} diagnostic revealed severe computational overhead: Gemini invoked its integrated 
+Python Code Interpreter to run inductive heuristics on sample raw codes:
 \begin{quote}
-\small\textit{"Codes starting with '08' seem to correspond to 'Budello' and 'Olio' (ingredients), while codes starting with 'I' or 'IM' correspond to 'Et termica', 'Vassoio', 'Film' (packaging)... I will perform a query, retrieve raw codes, and use python\_agent to categorize them..."}
+\small\textit{"Codes starting with '08' seem to correspond to 'Budello' and 'Olio' (ingredients), while codes starting with 'I' or 'IM' correspond to 'Et termica', 
+'Vassoio', 'Film' (packaging)... I will perform a query, retrieve raw codes, and use python\_agent to categorize them..."}
 \end{quote}
-Although analytically correct, executing runtime statistical categorization across thousands of rows introduced unacceptable latency and compute cost. Applying the core architectural tenet of pushing logic to the semantic core, this heuristic was formalized permanently inside the master LookML view (\texttt{l\_art\_jde}) as a compiled dimension:
+Although analytically correct, executing runtime statistical categorization across thousands of rows introduced unacceptable latency and compute cost. 
+Applying the core architectural tenet of pushing logic to the semantic core, this heuristic was formalized permanently inside the master LookML view (\texttt{l\_art\_jde}) 
+as a compiled dimension:
 \begin{lstlisting}[language=SQL]
 dimension: tipo_materiale {
   type: string
@@ -92,27 +124,37 @@ dimension: tipo_materiale {
   synonyms: ["categoria materiale", "tipologia materiale", "imballo vs ingrediente"]
 }
 \end{lstlisting}
-By promoting this business logic to a native LookML dimension, the agent's execution path was reduced from an exploratory multi-step Python routine to a single, deterministic SQL \texttt{GROUP BY} operation.
+By promoting this business logic to a native LookML dimension, the agent's execution path was reduced from an exploratory multi-step Python routine to a single, 
+deterministic SQL \texttt{GROUP BY} operation.
 
 \subsection{Mitigating the "Superset Trap" via Exact Match Constraints}
-When users prompted the agent with specific numerical codes (e.g., \textit{"Quanti ingredienti mi servono per l'articolo 00700 fino a fine anno?"}), the model exhibited a common conversational vulnerability termed the "superset trap." Rather than executing the query, the agent paused, asking whether the user meant the exact string \texttt{00700} or superset variants present in the database (such as \texttt{00700F}, \texttt{100200700}, or \texttt{100700001}).
+When users prompted the agent with specific numerical codes (e.g., \textit{"Quanti ingredienti mi servono per l'articolo 00700 fino a fine anno?"}), the model exhibited 
+a common conversational vulnerability termed the "superset trap." Rather than executing the query, the agent paused, asking whether the user meant the exact string 
+\texttt{00700} or superset variants present in the database (such as \texttt{00700F}, \texttt{100200700}, or \texttt{100700001}).
 
 To maintain operational velocity, an explicit constraint was codified in the agent instructions:
 \begin{quote}
-\small\textit{"Se l'utente fornisce un codice (articolo, materiale, piattaforma o unità di misura), questo deve essere considerato una corrispondenza esatta (EXACT\_MATCH). Se il codice inserito è presente nel database, non applicare la logica Superset Trap e non richiedere chiarimenti su codici simili o che lo contengano."}
+\small\textit{"Se l'utente fornisce un codice (articolo, materiale, piattaforma o unità di misura), questo deve essere considerato una corrispondenza esatta (EXACT\_MATCH). 
+Se il codice inserito è presente nel database, non applicare la logica Superset Trap e non richiedere chiarimenti su codici simili o che lo contengano."}
 \end{quote}
 
 \subsection{Computational Bounding and Temporal Fallbacks}
-To safeguard backend database resources against unbounded table scans, an instruction was implemented governing open-ended temporal queries: whenever a user omits a concrete planning horizon, the agent automatically applies a default window spanning from the current calendar date to the end of the subsequent calendar month. This bounds database slot utilization while aligning with the operational horizon of short-term material procurement.
+To safeguard backend database resources against unbounded table scans, an instruction was implemented governing open-ended temporal queries: whenever a user omits a concrete 
+planning horizon, the agent automatically applies a default window spanning from the current calendar date to the end of the subsequent calendar month. This bounds database 
+slot utilization while aligning with the operational horizon of short-term material procurement.
 
 \section[Multi-Unit Reporting]{Handling Heterogeneous Units of Measure: The Dashboard Deep-Linking Pattern}
 \label{sec:uom_deep_linking}
 
-A major structural hurdle in conversational BI arises when querying physical volumes across heterogeneous Units of Measure (UoM). In Amadori's Material Planning fact table, materials are measured in disparate operational metrics: packaging in pieces (\texttt{NR}), barrier film in meters (\texttt{MT}), cardboard in square meters (\texttt{MQ}), and raw spices in kilograms (\texttt{KG}).
+A major structural hurdle in conversational BI arises when querying physical volumes across heterogeneous Units of Measure (UoM). In Amadori's Material Planning fact table, 
+materials are measured in disparate operational metrics: packaging in pieces (\texttt{NR}), barrier film in meters (\texttt{MT}), cardboard in square meters (\texttt{MQ}), 
+and raw spices in kilograms (\texttt{KG}).
 
-Executing a global aggregate query such as $\sum \text{mat\_qta}$ across mixed units produces an invalid sum, while instructing the agent to dynamically render \textit{"separate charts for each unit of measure"} exposes a fundamental architectural constraint of LLM chat interfaces:
+Executing a global aggregate query such as $\sum \text{mat\_qta}$ across mixed units produces an invalid sum, while instructing the agent to dynamically render 
+\textit{"separate charts for each unit of measure"} exposes a fundamental architectural constraint of LLM chat interfaces:
 \begin{itemize}
-    \item \textbf{Single-Query, Multi-Rendering Conflict:} The agent compiles a single SQL query at runtime before inspecting how many distinct UoMs exist for the queried platform and timeframe. Lacking native multi-pass runtime looping capabilities within a single turn, the agent generates duplicate visual widgets all bound to the identical aggregated dataset.
+    \item \textbf{Single-Query, Multi-Rendering Conflict:} The agent compiles a single SQL query at runtime before inspecting how many distinct UoMs exist for the queried 
+    platform and timeframe. Lacking native multi-pass runtime looping capabilities within a single turn, the agent generates duplicate visual widgets all bound to the identical aggregated dataset.
 \end{itemize}
 
 \subsection{Architecture of the Solution: The \texttt{fabbisogni\_um} Certified Dashboard}
