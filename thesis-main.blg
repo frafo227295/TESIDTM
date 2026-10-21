@@ -25,47 +25,45 @@ Warning--entry type for "googlecloudlookerca2024" isn't style-file defined
 --line 399 of file bibliography.bib
 Warning--entry type for "googlecloudlookeragents2026" isn't style-file defined
 --line 415 of file bibliography.bib
-Warning--entry type for "devoteam2026looker" isn't style-file defined
---line 431 of file bibliography.bib
-You've used 23 entries,
+You've used 22 entries,
             2118 wiz_defined-function locations,
-            635 strings with 8272 characters,
-and the built_in function-call counts, 7044 in all, are:
-= -- 648
-> -- 422
+            632 strings with 8166 characters,
+and the built_in function-call counts, 6838 in all, are:
+= -- 629
+> -- 415
 < -- 2
-+ -- 173
-- -- 146
-* -- 483
-:= -- 1253
-add.period$ -- 70
-call.type$ -- 23
-change.case$ -- 134
++ -- 170
+- -- 144
+* -- 477
+:= -- 1219
+add.period$ -- 67
+call.type$ -- 22
+change.case$ -- 130
 chr.to.int$ -- 0
-cite$ -- 23
-duplicate$ -- 242
-empty$ -- 514
-format.name$ -- 146
-if$ -- 1413
+cite$ -- 22
+duplicate$ -- 235
+empty$ -- 492
+format.name$ -- 144
+if$ -- 1368
 int.to.chr$ -- 0
-int.to.str$ -- 23
+int.to.str$ -- 22
 missing$ -- 27
-newline$ -- 118
-num.names$ -- 46
-pop$ -- 172
+newline$ -- 113
+num.names$ -- 44
+pop$ -- 163
 preamble$ -- 1
-purify$ -- 118
+purify$ -- 115
 quote$ -- 0
-skip$ -- 153
+skip$ -- 146
 stack$ -- 0
-substring$ -- 260
-swap$ -- 23
+substring$ -- 255
+swap$ -- 22
 text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 72
+type$ -- 68
 warning$ -- 0
-while$ -- 58
-width$ -- 25
-write$ -- 254
-(There were 4 warnings)
+while$ -- 56
+width$ -- 24
+write$ -- 244
+(There were 3 warnings)

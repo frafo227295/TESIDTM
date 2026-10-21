@@ -80,6 +80,15 @@ as it is updated only annually and frequently contains residual volume allocatio
 For this reason, to ensure data hygiene and avoid generating fictitious material requirements, an automated upstream filtering stage strips out obsolete products.
 Moreover, the engine filters out commercialized products that the enterprise merely resells without internal manufacturing, for which no Bill of Materials explosion is needed. 
 
+The end-to-end architecture governing horizon reconciliation, product archetype routing, and deposit allocation is synthesized in \Cref{fig:demand_decision_tree}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/decision_tree_mp.jpg}
+    \caption{Material planning demand decision tree: chronological data source selection, product archetype routing (PFL vs. PN/PFN), platform allocation, and sequential BOM explosion.}
+    \label{fig:demand_decision_tree}
+\end{figure}
+
 A core layer of complexity stems from product taxonomy and the corresponding Bill of Materials (BOM) explosion rules across three product archetypes: 
 Finished-in-Line Products (\textit{Prodotti Finiti in Linea}, PFL), Neutral Products (\textit{Prodotti Neutri}, PN), and Finished-from-Neutral Products (\textit{Prodotti Finiti da Neutro}, PFN). 
 Finished-in-Line products exit the production line fully labeled and ready for the market, meaning their single BOM contains the complete set of ingredients, 

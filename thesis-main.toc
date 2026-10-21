@@ -4,30 +4,53 @@
 \contentsline {section}{\numberline {1.1}Context and Motivations}{1}{section.1.1}%
 \contentsline {section}{\numberline {1.2}Objective of the Work}{2}{section.1.2}%
 \contentsline {section}{\numberline {1.3}Structure of the Thesis}{3}{section.1.3}%
-\contentsline {chapter}{\numberline {2}The Corporate Context and Supply Chain Complexity}{5}{chapter.2}%
-\contentsline {section}{\numberline {2.1}The Poultry Sector}{5}{section.2.1}%
-\contentsline {section}{\numberline {2.2}The Complexity of the BOM}{6}{section.2.2}%
-\contentsline {section}{\numberline {2.3}The Planning Cycle}{7}{section.2.3}%
-\contentsline {chapter}{\numberline {3}The Forecasting Engine and Data Refactoring}{9}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Statistical Models for Demand Forecast}{9}{section.3.1}%
-\contentsline {section}{\numberline {3.2}The ``As-Is'' Model}{10}{section.3.2}%
-\contentsline {section}{\numberline {3.3}The Current Forecast as ``Suboptimal``}{12}{section.3.3}%
+\contentsline {chapter}{\numberline {2}Corporate Profile and Strategic Overview of Amadori S.p.A.}{5}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Industrial Profile}{5}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Portfolio Strategy}{6}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Operational Constraints}{7}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Demand Planning Rationale}{8}{section.2.4}%
+\contentsline {chapter}{\numberline {3}The Forecasting Engine and Material Planning Project}{9}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Overview of Statistical Models for Demand Forecasting}{9}{section.3.1}%
+\contentsline {section}{\numberline {3.2}The ``As-Is'' Demand Model: ARIMAX and TSLM Approaches}{10}{section.3.2}%
+\contentsline {section}{\numberline {3.3}The Material Planning Engine}{11}{section.3.3}%
 \contentsline {chapter}{\numberline {4}Architectural and Organizational Evolution}{15}{chapter.4}%
 \contentsline {section}{\numberline {4.1}The Data Product Paradigm}{15}{section.4.1}%
-\contentsline {section}{\numberline {4.2}The Business Glossary}{16}{section.4.2}%
+\contentsline {section}{\numberline {4.2}Conceptual Alignment}{16}{section.4.2}%
 \contentsline {section}{\numberline {4.3}The Semantic Layer}{17}{section.4.3}%
-\contentsline {section}{\numberline {4.4}The Knowledge Graph}{19}{section.4.4}%
-\contentsline {section}{\numberline {4.5}Centrality of Metadata Management}{20}{section.4.5}%
-\contentsline {section}{\numberline {4.6}Data and AI Champions}{22}{section.4.6}%
-\contentsline {section}{\numberline {4.7}The Restructured Data Office}{23}{section.4.7}%
-\contentsline {chapter}{\numberline {5}The Technological Framework and Software Stack}{25}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Backend Infrastructure}{25}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Looker and LookML}{26}{section.5.2}%
-\contentsline {section}{\numberline {5.3}The OpenMetadata Ecosystem}{28}{section.5.3}%
-\contentsline {section}{\numberline {5.4}Generative AI Enablement}{29}{section.5.4}%
-\contentsline {chapter}{\numberline {6}Case Study: Material Planning and Simulation}{31}{chapter.6}%
-\contentsline {section}{\numberline {6.1}The Bill of Materials Explosion}{31}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Delimiting the Analysis Perimeter}{33}{section.6.2}%
-\contentsline {section}{\numberline {6.3}Transparent Substitution of the Data Product}{34}{section.6.3}%
-\contentsline {chapter}{\numberline {7}Design of a Conversational Analytical Experience}{35}{chapter.7}%
-\contentsline {chapter}{\numberline {8}Conclusions}{37}{chapter.8}%
+\contentsline {section}{\numberline {4.4}Enterprise Knowledge Graphs}{19}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Active Metadata Management}{20}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Organizational Transformation}{21}{section.4.6}%
+\contentsline {chapter}{\numberline {5}The Technological Framework and Software Stack}{23}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Backend Infrastructure}{23}{section.5.1}%
+\contentsline {section}{\numberline {5.2}The Semantic Layer with Looker and LookML}{24}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}Architectural Best Practices and Performance Optimization}{24}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.2.2}Centralized Governance and the DRY Principle in Security Design}{25}{subsection.5.2.2}%
+\contentsline {subsection}{\numberline {5.2.3}Implementation: Material Planning Fact and Master Views}{26}{subsection.5.2.3}%
+\contentsline {subsection}{\numberline {5.2.4}Model Definition: Relational Joins and Access Perimeter}{32}{subsection.5.2.4}%
+\contentsline {subsection}{\numberline {5.2.5}Semantic Modeling for Self-Service Exploration and AI Enablement}{34}{subsection.5.2.5}%
+\contentsline {paragraph}{Enabling Governed Self-Service Business Intelligence}{34}{section*.7}%
+\contentsline {paragraph}{Enabling Grounded Generative AI Agents}{35}{section*.8}%
+\contentsline {section}{\numberline {5.3}Metadata Architecture Roadmap}{36}{section.5.3}%
+\contentsline {chapter}{\numberline {6}Conversational Analytics and Agentic Workflows with Gemini in Looker}{39}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Introduction}{39}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Looker Conversational Modalities}{40}{section.6.2}%
+\contentsline {section}{\numberline {6.3}System Instructions and Domain Contextualization}{41}{section.6.3}%
+\contentsline {subsection}{\numberline {6.3.1}Persona and Proactive Dialogue Policy}{41}{subsection.6.3.1}%
+\contentsline {subsection}{\numberline {6.3.2}Codification of Agri-Food Supply Chain Taxonomies}{41}{subsection.6.3.2}%
+\contentsline {subsection}{\numberline {6.3.3}Operational Defaults and Execution Guardrails}{42}{subsection.6.3.3}%
+\contentsline {section}{\numberline {6.4}Iterative Engineering and Logic Migration}{43}{section.6.4}%
+\contentsline {subsection}{\numberline {6.4.1}The Architectural Journey of Business Logic: The Three-Stage Maturation Cycle}{43}{subsection.6.4.1}%
+\contentsline {subsection}{\numberline {6.4.2}Resolution of Edge Cases: Exact Matches and Superset Traps}{45}{subsection.6.4.2}%
+\contentsline {section}{\numberline {6.5}Multi-Unit Reporting and Visual Disparity}{45}{section.6.5}%
+\contentsline {subsection}{\numberline {6.5.1}The Multi-Unit of Measure Aggregation Hazard}{45}{subsection.6.5.1}%
+\contentsline {subsection}{\numberline {6.5.2}Scale-Disparity Governance and Logarithmic Visualizations}{46}{subsection.6.5.2}%
+\contentsline {subsection}{\numberline {6.5.3}Contextual Dashboard Deep-Linking: Architectural Intent vs. Sandbox Constraints}{47}{subsection.6.5.3}%
+\contentsline {section}{\numberline {6.6}Validation Framework: The Golden Queries Suite}{47}{section.6.6}%
+\contentsline {subsection}{\numberline {6.6.1}Benchmarking Criteria and Taxonomy}{47}{subsection.6.6.1}%
+\contentsline {subsection}{\numberline {6.6.2}Deep Diagnostic Breakdown of Golden Queries}{49}{subsection.6.6.2}%
+\contentsline {subsubsection}{GQ-1: Broad Structural Demand over Medium Horizon}{49}{section*.7}%
+\contentsline {subsubsection}{GQ-2: Geographic Resolution and Temporal Fallbacks}{49}{section*.8}%
+\contentsline {subsubsection}{GQ-3: Exact Item Code and Line Filtering without Superset Trap}{50}{section*.9}%
+\contentsline {subsubsection}{GQ-4: Anomaly Detection and Visual Skew Handling via Python}{51}{section*.10}%
+\contentsline {section}{\numberline {6.7}Socio-Technical Impact on the Data Office}{52}{section.6.7}%
+\contentsline {chapter}{\numberline {7}Conclusions}{55}{chapter.7}%
