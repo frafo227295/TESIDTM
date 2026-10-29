@@ -74,7 +74,7 @@ and both environments remain active concurrently during the transitional period.
 The Material Planning domain illustrates how this strategy is applied in practice. The material requirements calculation described in \Cref{chap:demandforecast}
 runs as a nightly batch job on Oracle and populates the core fact table, \texttt{F\_\allowbreak MATERIAL\_\allowbreak PLANNING}.
 Since the direct connection between Looker and Oracle was not yet available during the development of this work, the semantic model was prototyped against a
-BigQuery sandbox project (\texttt{material\_planning\_export}), into which the Oracle output tables were exported manually.
+BigQuery sandbox project (\texttt{material\_\allowbreak planning\_\allowbreak export}), into which the Oracle output tables were exported manually.
 This setup made it possible to design and validate the LookML model and the conversational agent on real data, but it is not sustainable as an operating solution,
 since it relies on repeated manual loads. Once the Looker--Oracle connection is in place, the model will query Oracle directly;
 at a later stage, when the pipeline itself is migrated, it will be pointed to the production BigQuery tables.
@@ -83,7 +83,7 @@ at a later stage, when the pipeline itself is migrated, it will be pointed to th
 % SECTION 5.2
 %----------------------------------------------------------------------------------------
 
-\section[The Semantic Layer with Looker and LookML]{Formalizing business data: the Semantic Layer with Looker and LookML}
+\section[The Semantic Layer with Looker and LookML]{Formalizing business data:\\ the Semantic Layer with Looker and LookML}
 \label{sec:looker_lookml}
 
 To operationalize the conceptual definitions established by the enterprise ontology and provide an auditable single source of truth across analytical processes, 
