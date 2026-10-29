@@ -5,20 +5,28 @@
 \chaptermark{Technological Stack}
 %----------------------------------------------------------------------------------------
 \section[Backend Infrastructure]{Backend Infrastructure and Data Platform Architecture}
+\label{sec:backend_infrastructure}
 
-To operationalize the domain-oriented Data Product model and support interactive analytical workloads within Amadori S.p.A., 
-the enterprise data architecture is undergoing an evolutionary transition from an on-premises relational infrastructure toward a scalable, cloud-native platform. 
+To operationalize the domain-oriented Data Product model and support interactive analytical workloads within Amadori S.p.A.,
+the enterprise data architecture is undergoing a gradual transition from an on-premises relational infrastructure toward a cloud-native platform.
 
-The baseline enterprise environment relies primarily on an on-premises Oracle database, which has historically served as the operational transaction 
-repository and the default target for analytical queries. To overcome the computational constraints of centralized on-premises hardware and eliminate 
-contention between transactional processing and resource-intensive analytics, the target architecture introduces Google BigQuery as the enterprise cloud data warehouse. 
-BigQuery provides a serverless, highly scalable environment based on distributed compute engines and columnar storage, enabling parallelized execution of complex 
-analytical queries over large-scale historical datasets.
+The baseline enterprise environment relies primarily on an on-premises Oracle database, which has historically served as the operational transaction
+repository and the default target for analytical queries. To overcome the computational constraints of on-premises hardware and reduce
+contention between transactional processing and resource-intensive analytics, the target architecture introduces Google BigQuery as the enterprise cloud data warehouse.
+BigQuery provides a serverless environment based on distributed compute and columnar storage, well suited to analytical queries over large historical datasets.
 
-Rather than implementing an abrupt cutover, the transition follows a phased migration strategy. 
-In the initial phase, analytical workloads and reporting pipelines continue to query the operational Oracle database directly. 
-As data models, historical partitions, and ETL routines are progressively refactored and validated, tables are transferred to Google BigQuery. 
-During this transitional period, both database environments remain active concurrently.
+Rather than an abrupt cutover, the transition follows a phased strategy.
+In a first production phase, Looker queries the operational Oracle database directly.
+As data models, historical partitions, and ETL routines are progressively refactored and validated, tables are transferred to Google BigQuery,
+and both environments remain active concurrently during the transitional period.
+
+The Material Planning domain illustrates how this strategy is applied in practice. The material requirements calculation described in \Cref{chap:demandforecast}
+runs as a nightly batch job on Oracle, which populates the core fact table \texttt{F\_MATERIAL\_PLANNING}.
+Since the direct connection between Looker and Oracle was not yet available during the development of this work, the semantic model was prototyped against a
+BigQuery sandbox project (\texttt{material\_planning\_export}), into which the Oracle output tables were exported manually.
+This setup made it possible to design and validate the LookML model and the conversational agent on real data, but it is not sustainable as an operating solution,
+since it relies on repeated manual loads. Once the Looker--Oracle connection is in place, the model will query Oracle directly;
+at a later stage, when the pipeline itself is migrated, it will be pointed to the production BigQuery tables.
 
 %----------------------------------------------------------------------------------------
 % SECTION 5.2
@@ -29,64 +37,55 @@ During this transitional period, both database environments remain active concur
 
 To operationalize the conceptual definitions established by the enterprise ontology and provide an auditable single source of truth across analytical processes, 
 the architecture implements Looker and its declarative modeling language, LookML. In this stack, Looker acts not merely as a visualization layer, 
-but as the centralized execution engine for the enterprise Semantic Layer \cite{patel2023comparative}. 
-Operating on an in-database query paradigm, the platform keeps analytical data within the underlying storage while dynamically compiling user requests, dashboards, 
-and API calls into optimized SQL queries executed by the target engine at runtime \cite{gartner2021magic}.
+but as the execution engine of the enterprise Semantic Layer \cite{patel2023comparative}.
+Operating on an in-database query paradigm, the platform does not extract data into its own storage: it compiles user requests, dashboards,
+and API calls into SQL queries that are executed by the underlying database at runtime \cite{gartner2021magic}.
 
-This centralized abstraction plays a strategic role in the phased migration from the on-premises Oracle database to Google BigQuery. 
-By isolating semantic definitions from physical database dialects, LookML allows metrics and dimensions to initially query Oracle instances and subsequently repoint 
-to cloud tables as domain migrations conclude. Downstream analytical consumers, executive reports, and AI interfaces remain entirely insulated from storage shifts, 
-experiencing continuous metric integrity and zero operational disruption.
-
-For example, the operational material planning pipeline currently populates the core fact table (\texttt{F\_MATERIAL\_PLANNING}) via a daily batch job on Oracle. 
-When this workload is migrated to BigQuery in a future deployment phase, only the model-level connection parameters and dialect syntax will require adjustment in LookML. 
-The exposed business logic and entities will remain untouched, ensuring seamless continuity for downstream users and cognitive agents.
+This abstraction is what makes the phased migration described in \Cref{sec:backend_infrastructure} manageable.
+Because semantic definitions are isolated from the physical database, the same LookML model can move from the BigQuery sandbox to Oracle, and later to production BigQuery,
+by changing the model connection and adapting the dialect-specific SQL fragments (e.g., table references and string functions).
+The business entities and measures exposed to users, reports, and AI interfaces remain unchanged, so downstream consumers are largely insulated from the storage transition.
 
 \subsection{Architectural Best Practices and Performance Optimization}
-Designing a high-throughput Semantic Layer requires balancing analytical flexibility with computational efficiency. 
-When modeling complex supply chain dynamics in LookML, several engineering best practices were applied to minimize query execution overhead and prevent maintenance 
-bottlenecks \cite{googlecloudlookerbp2024}:
+Designing a Semantic Layer requires balancing analytical flexibility with computational efficiency.
+When modeling the Material Planning domain in LookML, the following design guidelines were adopted to limit query cost and maintenance effort \cite{googlecloudlookerbp2024};
+their concrete application is shown in the listings of the following subsections:
 \begin{itemize}
-    \item \textbf{Pushing transformations upstream:} Complex business logic, recursive allocations, and historical rolling aggregations are executed upstream 
-    during database batch processing rather than calculated dynamically inside LookML. 
-    Looker is dedicated strictly to dimensional aggregation, filtering, and metric definition, eliminating resource-intensive row-level computations at query runtime.
-    \item \textbf{Denormalization of frequently filtered attributes:} While relational normalization minimizes redundancy in transactional (OLTP) systems, 
-    analytical workloads benefit from dimensional flattening. Frequently joined descriptive attributes are pre-aggregated or denormalized into wide structures, 
-    reducing join depth across large-scale fact tables.
-    \item \textbf{Handling surrogate keys and natural identifiers:} Technical surrogate keys used internally for database joins are systematically hidden from 
-    end users (\texttt{hidden: yes}). 
-    Instead, the model exposes standardized, concatenated business attributes (combining natural codes with intuitive descriptions), streamlining consumption 
-    for both human analysts and automated agents.
-    \item \textbf{Optimizing join paths in analytical queries:} Although an Explore defines an extensive relational network to grant complete self-service flexibility, 
-    Looker dynamically generates SQL containing only the joins required by the selected fields (\textbf{join pruning}). 
-    Dashboard tiles are intentionally modeled to reference minimal join paths, avoiding unnecessary table traversals and reducing computational pressure on the database engine.
-    \item \textbf{Establishing a curated semantic boundary:} LookML acts as a governed contract: attributes not explicitly defined or validated remain inaccessible to consuming tools. 
-    Restricting exposure exclusively to certified dimensions protects downstream consumers from raw, uncurated schema changes and deprecated physical columns.
+    \item \textbf{Pushing transformations upstream:} Complex business logic, recursive allocations, and rolling aggregations are computed
+    during database batch processing rather than inside LookML.
+    Looker is used for dimensional aggregation, filtering, and metric definition, avoiding expensive row-level computations at query time.
+    \item \textbf{Denormalization of frequently filtered attributes:} While normalization minimizes redundancy in transactional (OLTP) systems,
+    analytical workloads benefit from flatter structures. Frequently joined descriptive attributes are denormalized,
+    reducing join depth on large fact tables.
+    \item \textbf{Exposing business identifiers instead of surrogate keys:} Technical keys used for joins are kept internal,
+    and the model exposes business attributes that combine natural codes with readable descriptions.
+    \item \textbf{Join pruning:} Although an Explore defines a wide network of joins to support self-service analysis,
+    Looker generates SQL containing only the joins required by the selected fields, so a broad Explore does not imply expensive queries.
+    \item \textbf{A curated semantic boundary:} LookML acts as a contract: attributes that are not explicitly modeled are not accessible to consuming tools,
+    which protects downstream consumers from uncurated schema changes and deprecated physical columns.
 \end{itemize}
 
 \subsection{Centralized Governance and the DRY Principle in Security Design}
-A foundational engineering objective of formalizing business semantics in LookML is strict compliance with the \textit{Don't Repeat Yourself} (DRY) principle, 
-which directly prevents code duplication and long-term maintenance overhead across enterprise analytics.
+A central objective of formalizing business semantics in LookML is compliance with the \textit{Don't Repeat Yourself} (DRY) principle:
+each definition is written once and reused, avoiding duplicated code and the maintenance effort it entails.
 
-In conventional reporting architectures, enforcing data access segregation between distinct operational entities typically generates architectural anti-patterns. 
-Technical teams are frequently forced to replicate entire models, SQL queries, or dashboard copies simply to hardcode facility-specific filtering criteria 
-(e.g., maintaining cloned reports for each regional logistics deposit) or to strip out sensitive data columns for non-executive audiences. 
-This duplication incurs severe operational risks: whenever an underlying business logic changes, the alteration must be manually propagated across every replicated asset, 
-creating high maintenance costs, security vulnerabilities, and eventual metric drift.
+Access control is a typical source of duplication in conventional reporting architectures.
+Technical teams are often forced to replicate models, SQL queries, or dashboards simply to hardcode facility-specific filters
+(e.g., one copy of a report for each logistics deposit) or to remove sensitive columns for some audiences.
+Every change in the underlying logic must then be propagated manually to each copy, increasing maintenance costs and the risk of inconsistent metrics.
 
-Within the LookML framework, operational business definitions and data security boundaries are completely decoupled. 
-The platform implements a unified \textit{Attribute-Based Access Control} (ABAC) architecture governed through centralized user attributes:
+In LookML, business definitions and access rules are kept separate, and access is governed through centralized user attributes,
+following an \textit{Attribute-Based Access Control} (ABAC) approach:
 \begin{itemize}
-    \item \textbf{Dynamic Row-Level Security (RLS) via \texttt{access\_filter}:} Rather than creating dedicated Explores or dashboards for different facilities, 
-    row-level boundaries are enforced dynamically at query compilation time. Through Looker's \texttt{access\_filter} parameter, the engine maps an authenticated user's session 
-    attributes directly to the target dimensional columns. When a user runs a query or loads a dashboard, Looker automatically injects the parameterized filtering predicates 
-    into the generated SQL \texttt{WHERE} clause, ensuring strict data compartmentalization across the multi-site supply chain without duplicating a single line of modeling logic.
-    \item \textbf{Granular Column-Level Security (CLS) via \texttt{required\_access\_grants}:} Sensitive metric and dimensional visibility is governed directly at the semantic 
-    declaration level rather than by partitioning underlying database tables. 
-    To safeguard confidential commercial or financial indicators without maintaining separate reporting views, LookML applies \texttt{required\_access\_grants} tied to specific 
-    user attributes and permission sets. For instance, while gross material volumes are universally accessible to operational planners, sensitive measures tracking unit component 
-    costs can be restricted to authorized roles. Users or automated agents lacking explicit entitlements are strictly prevented from querying the restricted measures or seeing them 
-    exposed in the semantic metadata, achieving security by design within a single, centralized codebase.
+    \item \textbf{Row-Level Security (RLS) via \texttt{access\_filter} (implemented):} Instead of creating dedicated Explores or dashboards for each facility,
+    row-level restrictions are applied at query compilation time. The \texttt{access\_filter} parameter maps a user attribute to a model dimension,
+    and Looker adds the corresponding predicate to the \texttt{WHERE} clause of every generated query.
+    A single model therefore serves all sites, each user seeing only the platforms they are authorized for (see \Cref{lst:lookml_model}).
+    \item \textbf{Column-Level Security (CLS) via \texttt{required\_access\_grants} (designed, not yet implemented):} The same principle can be extended to columns.
+    By attaching \texttt{required\_access\_grants} to specific fields, sensitive measures---for instance, unit component costs, should they be added to the model---could be
+    restricted to authorized roles, while gross material volumes remain available to all planners.
+    Users or agents without the required grant would neither query nor see these fields, without the need for separate reporting views.
+    This extension is part of the planned evolution of the model and is not included in the current release.
 \end{itemize}
 
 \subsection{Implementation: Material Planning Fact and Master Views}
@@ -206,11 +205,11 @@ In contrast, the enterprise item registry, \texttt{l\_art\_jde}, represents a po
 
 Architecturally, modeling this registry could have followed two competing paradigms:
 \begin{enumerate}
-    \item \textbf{Dual View Anti-Pattern:} Authoring two distinct LookML view files (\texttt{prodotto.view.lkml} and \texttt{materiale.view.lkml}) pointing to the identical underlying physical table. While structurally intuitive, this approach directly violates the DRY principle. Maintaining duplicated codebases introduces severe maintenance risks: any upstream schema update or data type modification must be synchronized manually across multiple files, causing code drift and maintenance overhead.
+    \item \textbf{Dual View Anti-Pattern:} Authoring two distinct LookML view files (\texttt{prodotto.view.lkml} and \texttt{materiale.view.lkml}) pointing to the identical underlying physical table. While intuitive, this approach violates the DRY principle: any upstream schema or data type change must be synchronized manually across multiple files, with a risk of divergence over time.
     \item \textbf{Centralized Semantic View with Join-Level Role Playing (Implemented Architecture):} Consolidating all physical item attributes into a single authoritative LookML view (\texttt{l\_art\_jde}), while delegating operational specialization and field projection to the Explore model through aliased, role-playing joins.
 \end{enumerate}
 
-To enforce the DRY principle and ensure centralized maintainability, \texttt{l\_art\_jde} unifies the entire item schema within a single definition:
+Following the second approach, \texttt{l\_art\_jde} unifies the entire item schema within a single definition:
 
 \begin{lstlisting}[language=SQL, basicstyle=\footnotesize\ttfamily, caption={LookML Master Articles View (Representative Excerpt)}, label={lst:lookml_master}]
 view: l_art_jde {
@@ -333,15 +332,15 @@ explore: material_planning {
 }
 \end{lstlisting}
 
-As demonstrated in \Cref{lst:lookml_model}, the Explore configuration operationalizes the core architectural principles established across previous sections:
+\Cref{lst:lookml_model} shows how the principles introduced in the previous subsections are applied in the Explore configuration:
 \begin{itemize}
-    \item \textbf{Decoupled backend connection:} The top-level parameter \texttt{connection: "materialplanningbq"} targets the Google BigQuery analytical warehouse. Under the in-database compilation paradigm, altering this single parameter transitions the underlying engine dialect without modifying semantic field definitions or breaking downstream consumers.
-    \item \textbf{Operationalized Row-Level Security:} The \texttt{access\_filter} block enforces the ABAC security framework defined earlier. User session attributes (\texttt{piattaforma\_autorizzata}) are automatically injected into the generated SQL \texttt{WHERE} clause at runtime, filtering platform-specific records dynamically across all queries without report duplication.
-    \item \textbf{Role-playing dimension specialization:} The master table \texttt{l\_art\_jde} is instantiated twice: once as \texttt{prodotto} (finished commercial product driving demand) and once as \texttt{materiale} (raw material or packaging consumed). By restricting exposed attributes through the \texttt{fields} parameter, each joined entity projects only its contextually relevant dimensions, eliminating semantic collisions while preserving a centralized, DRY-compliant view definition.
-    \item \textbf{Hierarchical snowflaking:} Upstream product classifications—specifically product lines (\texttt{l\_lin}) and item families (\texttt{l\_fam})—are joined directly to the \texttt{prodotto} alias, creating a normalized dimensional hierarchy while leaving the core fact table centered at the proper level of aggregation.
+    \item \textbf{Backend connection:} The parameter \texttt{connection: "materialplanningbq"} currently points to the BigQuery sandbox described in \Cref{sec:backend_infrastructure}. Moving the model to Oracle, and later to production BigQuery, mainly requires changing this parameter and adapting dialect-specific SQL, while field definitions remain unchanged.
+    \item \textbf{Row-Level Security:} The \texttt{access\_filter} block binds the user attribute \texttt{piattaforma\_autorizzata} to the platform code, so every query is automatically restricted to the platforms the user is authorized for.
+    \item \textbf{Role-playing dimensions:} The master table \texttt{l\_art\_jde} is joined twice, as \texttt{prodotto} (the finished product driving demand) and as \texttt{materiale} (the raw material or packaging consumed). The join-level \texttt{fields} parameter projects only the relevant attributes into each namespace, avoiding ambiguous field names while keeping a single view definition.
+    \item \textbf{Hierarchical snowflaking:} Product lines (\texttt{l\_lin}) and families (\texttt{l\_fam}) are joined to the \texttt{prodotto} alias rather than to the fact table, forming a dimensional hierarchy while the fact table keeps its original grain.
 \end{itemize}
 
-\Cref{fig:looker_explore} shows the resulting consumption surface as presented to business users in the Looker Explore interface. The field picker exposes only business-oriented namespaces derived from view labels and join aliases (e.g., \textit{Articolo}, \textit{Materiale}, \textit{Piattaforma/Deposito}, \textit{Linea}, \textit{Famiglia}), while surrogate keys, foreign keys, and fragmented code/description columns declared with \texttt{hidden: yes} never appear. Expanding a namespace, such as \textit{Articolo} in the figure, reveals only the few certified dimensions projected through the join-level \texttt{fields} parameter. The interface therefore provides a direct visual counterpart of the curated semantic boundary: the entire Material Planning domain is reduced to a compact catalog of certified fields.
+\Cref{fig:looker_explore} shows the resulting consumption surface as presented to business users in the Looker Explore interface. The field picker exposes only business-oriented namespaces derived from view labels and join aliases (e.g., \textit{Articolo}, \textit{Materiale}, \textit{Piattaforma/Deposito}, \textit{Linea}, \textit{Famiglia}), while hidden technical fields never appear. Expanding a namespace, such as \textit{Articolo} in the figure, reveals only the few dimensions projected through the join-level \texttt{fields} parameter. The interface is thus the visible counterpart of the curated semantic boundary: the whole Material Planning domain is reduced to a compact catalog of certified fields.
 
 \begin{figure}[htbp]
     \centering
@@ -351,17 +350,17 @@ As demonstrated in \Cref{lst:lookml_model}, the Explore configuration operationa
 \end{figure}
 
 \subsection{Semantic Modeling for Self-Service Exploration and AI Enablement}
-The systematic codification of business logic and contextual metadata within LookML serves a dual strategic objective: empowering the network of embedded \textbf{Data \& AI Champions} with governed self-service analytical capabilities, while simultaneously establishing an authoritative, deterministic semantic layer for autonomous cognitive agents.
+The codification of business logic and contextual metadata in LookML serves two purposes: giving the \textbf{Data \& AI Champions} governed self-service analytical capabilities, and providing a reliable semantic layer for conversational agents.
 
 \paragraph{Enabling Governed Self-Service Business Intelligence}
-In conventional enterprise architectures, business units frequently encounter an operational bottleneck: every novel analytical inquiry requires technical ticketing requests to central data engineering teams. This structural friction encourages unmanaged data extraction into local spreadsheets, inevitably causing metric fragmentation, logic divergence, and corporate data silos.
+In conventional enterprise architectures, every new analytical question typically requires a request to the central data team. This friction encourages unmanaged data extraction into local spreadsheets, leading to divergent metric definitions and data silos.
 
-To overcome this divide, the operating model formalized in \Cref{sec:organizational_transformation} introduces the network of \textbf{Data \& AI Champions}—domain specialists embedded directly within operational business units who bridge domain requirements with analytical execution. The LookML Semantic Layer serves as the primary technical enabler for these Champions, providing an intuitive, guardrailed interface that safely delegates analytical autonomy without compromising governance:
+To address this, the operating model described in \Cref{sec:organizational_transformation} introduces the \textbf{Data \& AI Champions}, domain specialists embedded in the business units who connect operational requirements with analytical execution. The LookML Semantic Layer is their main technical enabler, offering an interface that delegates analytical autonomy within governed boundaries:
 
 \begin{itemize}
-    \item \textbf{Autonomous ad-hoc exploration via Symmetric Aggregates:} Within the unified \texttt{material\_planning} explore, the underlying physical complexity is translated into certified business dimensions and aggregated measures. By leveraging Looker's \textit{Symmetric Aggregates} engine—anchored to the composite \texttt{primary\_key} declared in the fact view—the platform mathematically eliminates fanout errors and Cartesian duplicates across multi-table joins. Champions can explore multidimensional cross-sections with mathematical confidence, fully protected against erroneous double-counting.
-    \item \textbf{Diagnostic root-cause analysis via \texttt{drill\_fields}:} Beyond consuming pre-aggregated figures, Champions utilize interactive drill paths declared via \texttt{drill\_fields} on core metrics (such as \texttt{fabbisogno\_materiale} and \texttt{casse\_articolo}). Upon identifying anomalous demand variances, they can instantaneously deconstruct the aggregate volume into underlying material classifications, SKU codes, and daily scheduling buckets, diagnosing supply chain bottlenecks autonomously.
-    \item \textbf{Reusable Looks as building blocks for dashboards:} Acting as analytical hubs within their units, Champions convert recurring operational questions into saved, named analytical views (\textit{Looks}), which are then assembled into dashboards for their peers. Because Looks and dashboards are anchored directly to centralized LookML definitions, they inherit upstream logic updates automatically, relieving central engineering from routine reporting maintenance while preserving single-source metric integrity.
+    \item \textbf{Ad-hoc exploration with consistent aggregation:} Within the \texttt{material\_planning} Explore, the physical data structure is presented as certified business dimensions and measures. In the current model all joins are \texttt{many\_to\_one} from the fact table, so fact measures are not duplicated by joins; moreover, the composite \texttt{primary\_key} declared in each view allows Looker's \textit{Symmetric Aggregates} to avoid double counting should measures on joined views be added in the future. Champions can therefore combine dimensions freely without having to reason about join cardinalities.
+    \item \textbf{Root-cause analysis via \texttt{drill\_fields}:} Core measures such as \texttt{fabbisogno\_materiale} and \texttt{casse\_articolo} declare drill paths. When a Champion notices an anomalous value, a click decomposes it into material types, items, and dates, supporting a first diagnosis without technical support.
+    \item \textbf{Reusable Looks as building blocks for dashboards:} Champions convert recurring operational questions into saved, named analytical views (\textit{Looks}), which are then assembled into dashboards for their colleagues. Since both are built on the central LookML definitions, they automatically reflect upstream logic changes, reducing the reporting maintenance carried by the central team.
 \end{itemize}
 
 \Cref{fig:looker_selfservice} illustrates a typical ad-hoc inquiry performed by a Champion without writing any SQL. Starting from the Explore, the user selects the \textit{Fabbisogno Materiale} measure, breaks it down by product line (\textit{Linea}) and forecast quarter, and restricts the scope through three filters: a single logistics platform, the \textit{Ingrediente} material type, and kilograms as unit of measure. Looker compiles these selections into a single SQL statement, translating each filter into a predicate of the \texttt{WHERE} clause (alongside any \texttt{access\_filter} bound to the user's attributes) and including only the joins required by the selected fields. The result is rendered as a set of donut charts, one per quarter, showing how ingredient requirements are distributed across product lines over the planning horizon.
@@ -385,16 +384,14 @@ Once validated, such an exploration is not left as a one-off query but saved as 
 Creating Looks before dashboards is the recommended practice in the adopted operating model. Each Look encapsulates a single, validated analytical question and becomes a reusable building block: the same Look can be embedded as a tile in multiple dashboards, shared via direct link, scheduled for periodic delivery, or used as a starting point for further exploration. Dashboards are therefore composed of Looks rather than of ad-hoc tiles built from scratch, so a correction or refinement applied once to a Look propagates to every dashboard that references it. This mirrors, at the consumption layer, the DRY principle already enforced in the LookML model: the metric is defined once in the semantic layer, the analytical question is defined once in a Look, and dashboards only orchestrate their composition and shared filters.
 
 \paragraph{Enabling Grounded Generative AI Agents}
-While human analysts and Champions interact with this semantic framework via visual exploration interfaces, the exact same declarative metadata acts as an auditable, deterministic API for autonomous Large Language Models (LLMs) and cognitive agents \cite{googlecloudlookerca2024}. 
-
-Directly generating raw SQL from natural language queries (\textbf{Text-to-SQL}) presents well-documented enterprise risks, including syntax hallucinations, invalid table joins, and unconstrained computational costs. By positioning LookML as an intermediary semantic API, the cognitive agent targets curated semantic entities rather than raw relational tables, utilizing the underlying metadata for precise operational grounding:
+The same metadata that guides human users through the Explore also serves as the interface for Large Language Model (LLM) agents \cite{googlecloudlookerca2024}. As discussed in \Cref{sec:semantic_layer}, letting an agent query a curated semantic model instead of generating raw SQL (\textit{Text-to-SQL}) reduces the risk of invalid joins and incorrect calculations. In the Material Planning model, three LookML parameters contribute directly to this grounding:
 \begin{itemize}
-    \item \textbf{Domain vocabulary disambiguation via \texttt{synonyms}:} Natural language prompts rarely mirror physical database columns. The \texttt{synonyms} parameter maps colloquial supply chain jargon, operational acronyms (e.g., \textit{"PFL"}, \textit{"PFN"}, \textit{"fabbisogno lordo"}), and informal business expressions directly to validated LookML dimensions, allowing the agent to resolve user intent to deterministic schema fields.
-    \item \textbf{Semantic grounding via \texttt{description}:} The \texttt{description} parameter defines the functional perimeter, source lineage, and aggregation logic of each measure. This declarative context supplies the LLM with unambiguous operational boundaries, preventing the model from misinterpreting calculated metrics or hallucinating arbitrary aggregation formulas.
-    \item \textbf{Context window optimization via \texttt{hidden} attributes:} By suppressing internal surrogate identifiers, technical foreign keys, and administrative flags via \texttt{hidden: yes}, the semantic contract filters unnecessary noise from the agent's prompt context. The LLM processes only certified, business-actionable attributes, minimizing prompt token consumption and preventing unintended join pathways.
+    \item \textbf{\texttt{synonyms} for vocabulary disambiguation:} Users rarely phrase questions with database column names. Synonyms map colloquial supply chain terms and acronyms (e.g., \textit{PFL}, \textit{PFN}, \textit{fabbisogno lordo}) to the corresponding LookML fields, helping the agent resolve user intent.
+    \item \textbf{\texttt{description} for semantic grounding:} Descriptions state the meaning, scope, and aggregation logic of each field, giving the model the context needed to choose the right measure instead of improvising a calculation.
+    \item \textbf{\texttt{hidden} for a smaller search space:} Fields hidden from users are also excluded from the agent's context, so the model only reasons over business-relevant attributes.
 \end{itemize}
 
-By encapsulating both calculation logic and semantic context directly within a version-controlled, auditable codebase, the architecture bridges human analytical workflows with autonomous computational intelligence. The concrete orchestration of this semantic layer with autonomous conversational agents, diagnostic reasoning loops, and dynamic dashboard routing is formally developed in \Cref{chap:conversational_agent}.
+How these elements are used by the conversational agent, and how their effect was evaluated, is discussed in \Cref{chap:conversational_agent}.
 
 %----------------------------------------------------------------------------------------
 % SECTION 5.3
@@ -409,11 +406,11 @@ To decouple business glossary governance from technical codebases and automate e
 
 \begin{enumerate}
     \item \textbf{Centralized, Low-Code Business Glossary:} Business definitions are transitioned from plain-text LookML parameters into an intuitive, low-code enterprise catalog accessible to non-technical stakeholders \cite{dama2024dmbok}. This interface empowers domain stewards across planning, supply chain, and commercial divisions to manage term ownership, certify metric definitions, and approve terminology changes collaboratively without submitting pull requests to a Git repository.
-    \item \textbf{Automated End-to-End Data Lineage:} The platform establishes systematic traceability across the entire data lifecycle by connecting source catalogs directly to consuming assets. By tracing data assets from their operational origin in the on-premises Oracle database, through cloud landing zones and transformations in Google BigQuery, down to the semantic entities compiled by Looker, automated lineage enables engineering teams to perform proactive impact analysis. Practitioners can precisely determine which downstream Explores, operational dashboards, or predictive workloads would be affected prior to executing upstream schema migrations.
-    \item \textbf{Enterprise Knowledge Graph Construction:} Enterprise metadata entities---including physical tables, pipeline orchestration schedules, semantic metric definitions, and access policies---are modeled as an interconnected knowledge graph \cite{hogan2021knowledge}. This unified structural topology provides deterministic insights into data provenance and operational quality, serving as an authoritative grounding fabric for autonomous AI workflows.
+    \item \textbf{Automated End-to-End Data Lineage:} The platform establishes systematic traceability across the entire data lifecycle by connecting source catalogs directly to consuming assets. By tracing data assets from their operational origin in the on-premises Oracle database, through cloud landing zones and transformations in Google BigQuery, down to the semantic entities compiled by Looker, automated lineage enables engineering teams to perform proactive impact analysis. Practitioners can determine which downstream Explores, operational dashboards, or predictive workloads would be affected prior to executing upstream schema migrations.
+    \item \textbf{Enterprise Knowledge Graph Construction:} Enterprise metadata entities---including physical tables, pipeline orchestration schedules, semantic metric definitions, and access policies---are modeled as an interconnected knowledge graph \cite{hogan2021knowledge}. This structure makes data provenance and quality explicit and can serve as an additional grounding source for AI workflows.
 \end{enumerate}
 
-In this target framework, OpenMetadata ingests metadata programmatically from Looker and underlying database instances via dedicated REST APIs, eliminating manual synchronization overhead. This architectural extension cleanly decouples analytical query compilation (orchestrated in-database by Looker across Oracle and BigQuery) from enterprise-wide metadata governance, completing the structural transition toward federated Data Products.
+In this target framework, OpenMetadata ingests metadata from Looker and the underlying databases through their APIs, reducing manual synchronization. This separates analytical query compilation, performed in-database by Looker on Oracle and BigQuery, from enterprise-wide metadata governance, a further step toward federated Data Products.
 
 \bigskip
-The technical architecture deployed at Amadori S.p.A. provides a resilient migration bridge, facilitating a secure and phased transition from legacy on-premises transactional systems toward the analytical scalability of Google BigQuery. By establishing Looker as the in-database Semantic Layer, the enterprise insulates operational reporting from physical storage cutovers, enforces the DRY principle across its metric catalog, guarantees granular Attribute-Based Access Control, and encapsulates complex supply chain dynamics within certified LookML models. With the foundational storage migration, relational modeling patterns, and metadata governance roadmap established, the subsequent chapter examines how this unified semantic layer enables autonomous conversational analytics through Gemini in Looker.
+In summary, the technical architecture adopted at Amadori S.p.A. supports a phased transition from on-premises Oracle toward Google BigQuery, with Looker acting as an in-database Semantic Layer that shields reports and AI interfaces from changes in the underlying storage. The LookML model centralizes metric definitions according to the DRY principle, enforces platform-level access through user attributes, and exposes the Material Planning domain as a curated set of business fields. The next chapter examines how this semantic layer is used by conversational agents through Gemini in Looker.
