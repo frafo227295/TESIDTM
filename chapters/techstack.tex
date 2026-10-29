@@ -341,6 +341,15 @@ As demonstrated in \Cref{lst:lookml_model}, the Explore configuration operationa
     \item \textbf{Hierarchical snowflaking:} Upstream product classifications—specifically product lines (\texttt{l\_lin}) and item families (\texttt{l\_fam})—are joined directly to the \texttt{prodotto} alias, creating a normalized dimensional hierarchy while leaving the core fact table centered at the proper level of aggregation.
 \end{itemize}
 
+\Cref{fig:looker_explore} shows the resulting consumption surface as presented to business users in the Looker Explore interface. The field picker exposes only business-oriented namespaces derived from view labels and join aliases (e.g., \textit{Articolo}, \textit{Materiale}, \textit{Piattaforma/Deposito}, \textit{Linea}, \textit{Famiglia}), while surrogate keys, foreign keys, and fragmented code/description columns declared with \texttt{hidden: yes} never appear. The interface therefore provides a direct visual counterpart of the curated semantic boundary: the entire Material Planning domain is reduced to a compact catalog of certified fields.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/looker_explore.png}
+    \caption{The \textit{Fabbisogno lordo materiali} Explore in Looker: the field picker exposes only the curated business namespaces defined in the LookML model, while technical identifiers remain hidden.}
+    \label{fig:looker_explore}
+\end{figure}
+
 \subsection{Semantic Modeling for Self-Service Exploration and AI Enablement}
 The systematic codification of business logic and contextual metadata within LookML serves a dual strategic objective: empowering the network of embedded \textbf{Data \& AI Champions} with governed self-service analytical capabilities, while simultaneously establishing an authoritative, deterministic semantic layer for autonomous cognitive agents.
 
@@ -354,6 +363,24 @@ To overcome this divide, the operating model formalized in \Cref{sec:organizatio
     \item \textbf{Diagnostic root-cause analysis via \texttt{drill\_fields}:} Beyond consuming pre-aggregated figures, Champions utilize interactive drill paths declared via \texttt{drill\_fields} on core metrics (such as \texttt{fabbisogno\_materiale} and \texttt{casse\_articolo}). Upon identifying anomalous demand variances, they can instantaneously deconstruct the aggregate volume into underlying material classifications, SKU codes, and daily scheduling buckets, diagnosing supply chain bottlenecks autonomously.
     \item \textbf{Decentralized dashboard curation and peer distribution:} Acting as analytical hubs within their units, Champions convert operational needs into curated analytical views (\textit{Looks}) and compose dynamic, cross-filtered dashboards for their peers. Because these operational assets are anchored directly to centralized LookML definitions, departmental dashboards inherit upstream logic updates automatically, relieving central engineering from routine reporting maintenance while preserving single-source metric integrity.
 \end{itemize}
+
+\Cref{fig:looker_selfservice} illustrates a typical ad-hoc inquiry performed by a Champion without writing any SQL. Starting from the Explore, the user selects the \textit{Fabbisogno Materiale} measure, breaks it down by product line (\textit{Linea}) and forecast quarter, and restricts the scope through three filters: a single logistics platform, the \textit{Ingrediente} material type, and kilograms as unit of measure. Looker compiles these selections into a single SQL statement, translating each filter into a predicate of the \texttt{WHERE} clause (alongside any \texttt{access\_filter} bound to the user's attributes) and including only the joins required by the selected fields. The result is rendered as a set of donut charts, one per quarter, showing how ingredient requirements are distributed across product lines over the planning horizon.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/looker_selfservice.png}
+    \caption{Self-service exploration in Looker: gross ingredient requirements (kg) for a single platform, broken down by product line and forecast quarter.}
+    \label{fig:looker_selfservice}
+\end{figure}
+
+Once validated, such an exploration can be saved and promoted to a dashboard tile, as shown in \Cref{fig:looker_dashboard}. The dashboard exposes the same dimensions as interactive dashboard-level filters (\textit{Piattaforma}, \textit{Tipo Materiale}, \textit{UM}), whose suggested values are populated directly from the LookML model. Peers can therefore switch platform, material type, or unit of measure (e.g., from kilograms to linear meters for packaging films) without modifying the underlying query, and any future change to the semantic definitions is automatically inherited by the dashboard.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/looker_dashboard.png}
+    \caption{A Champion-curated Looker dashboard in edit mode, built on the same Explore: dashboard-level filters on platform, material type, and unit of measure drive all tiles, with filter values suggested by the semantic model.}
+    \label{fig:looker_dashboard}
+\end{figure}
 
 \paragraph{Enabling Grounded Generative AI Agents}
 While human analysts and Champions interact with this semantic framework via visual exploration interfaces, the exact same declarative metadata acts as an auditable, deterministic API for autonomous Large Language Models (LLMs) and cognitive agents \cite{googlecloudlookerca2024}. 
