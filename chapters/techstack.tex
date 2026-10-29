@@ -373,12 +373,12 @@ To overcome this divide, the operating model formalized in \Cref{sec:organizatio
     \label{fig:looker_selfservice}
 \end{figure}
 
-Once validated, such an exploration is not left as a one-off query but saved as a \textit{Look}, as shown in \Cref{fig:looker_look}. A Look is a named, persistent analytical asset that stores the selected fields, filters, and visualization settings, and is published in a shared folder where business users consume it in read-only mode. Users can still adjust the exposed filters (e.g., platform, material type, or unit of measure), whose suggested values are populated directly from the LookML model, without being able to alter the underlying query definition.
+Once validated, such an exploration is not left as a one-off query but saved as a \textit{Look}, as shown in \Cref{fig:looker_look}. A Look is a named, persistent analytical asset that stores the selected fields, filters, and visualization settings, and is published in a shared folder where business users consume it in read-only mode. Users can still adjust the exposed filters (e.g., platform, material type, or unit of measure), whose suggested values are populated directly from the LookML model, without being able to alter the underlying query definition. For this reason the Look is deliberately given a generic title: the same asset answers the question for ingredients in kilograms as well as for packaging in linear meters, simply by changing the filter values.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{figures/looker_look.png}
-    \caption{The exploration of \Cref{fig:looker_selfservice} saved as a reusable Look (\textit{Ingredients (Kg) by line and quarter}), consumed by business users in read-only mode with adjustable filters.}
+    \caption{The exploration of \Cref{fig:looker_selfservice} saved as a reusable Look (\textit{Materials by line and quarter}), consumed by business users in read-only mode; platform, material type, and unit of measure remain adjustable filters.}
     \label{fig:looker_look}
 \end{figure}
 
