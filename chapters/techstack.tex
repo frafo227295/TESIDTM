@@ -4,6 +4,57 @@
 \label{chap:techstack}
 \chaptermark{Technological Stack}
 %----------------------------------------------------------------------------------------
+
+This chapter describes the technological stack that implements the architecture introduced in \Cref{chap:architecture}, using the Material Planning domain as a reference case.
+\Cref{fig:techstack_overview} provides an overview of its components: the data platform, where the material requirements are calculated and stored (\Cref{sec:backend_infrastructure});
+the Semantic Layer built with Looker and LookML, which exposes this data as governed business entities (\Cref{sec:looker_lookml});
+the consumers of the Semantic Layer, namely business users through Looker's visual interfaces and the conversational agent discussed in \Cref{chap:conversational_agent};
+and, finally, the metadata platform planned as a future governance extension (\Cref{sec:openmetadata_roadmap}).
+
+\begin{figure}[htbp]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[
+        font=\footnotesize,
+        box/.style={draw, rounded corners=2pt, align=center, minimum height=12mm, text width=34mm, inner sep=3pt, fill=white},
+        planned/.style={box, dashed},
+        arrow/.style={-{Stealth[length=2mm]}, thick},
+        parrow/.style={arrow, dashed},
+        lbl/.style={font=\scriptsize, fill=white, inner sep=1.5pt, align=center}
+    ]
+        % data platform
+        \node[box, text width=38mm] (oracle) {\textbf{Oracle} (on-premises)\\[1pt] nightly Material Planning batch\\ {\scriptsize\texttt{F\_MATERIAL\_PLANNING}}};
+        \node[box, above right=6mm and 14mm of oracle] (bqsbx) {\textbf{BigQuery sandbox}\\ prototype, manual export};
+        \node[planned, below right=6mm and 14mm of oracle] (bqprod) {\textbf{BigQuery production}\\ target};
+
+        % semantic layer
+        \node[box, right=16mm of bqsbx.east |- oracle.east, anchor=west, minimum height=38mm, text width=36mm] (looker) {\textbf{Looker}\\ \textbf{Semantic Layer}\\[4pt] LookML views and Explore\\ measures, synonyms\\ \texttt{access\_filter}\\[4pt] \textit{Git repository}\\ \textit{(dev mode, pull requests)}};
+
+        % consumers
+        \node[box, above right=3mm and 10mm of looker.east, anchor=south west] (bi) {\textbf{Explore, Looks, dashboards}\\ Champions and business users};
+        \node[box, below right=3mm and 10mm of looker.east, anchor=north west] (agent) {\textbf{Gemini in Looker}\\ conversational agent\\ (\Cref{chap:conversational_agent})};
+
+        % metadata platform
+        \node[planned, below=14mm of bqprod.south -| looker.south, anchor=north, text width=80mm, minimum height=10mm] (omd) {\textbf{OpenMetadata} (roadmap)\\ business glossary, lineage, knowledge graph};
+
+        % data flows
+        \draw[arrow] (oracle.north) |- node[lbl, pos=0.75] {export} (bqsbx.west);
+        \draw[parrow] (oracle.south) |- node[lbl, pos=0.75] {migration} (bqprod.west);
+        \draw[arrow] (bqsbx.east) -- node[lbl, pos=0.45] {current} (bqsbx.east -| looker.west);
+        \draw[parrow] (oracle.east) -- node[lbl, pos=0.5] {phase 1: direct connection} (oracle.east -| looker.west);
+        \draw[parrow] (bqprod.east) -- node[lbl, pos=0.45] {phase 2} (bqprod.east -| looker.west);
+        \draw[arrow] (looker.east |- bi.west) -- (bi.west);
+        \draw[arrow] (looker.east |- agent.west) -- (agent.west);
+
+        % metadata ingestion
+        \draw[parrow, gray] ([xshift=-12mm]oracle.south) |- (omd.west);
+        \draw[parrow, gray] (looker.south) -- (omd.north -| looker.south);
+    \end{tikzpicture}%
+    }
+    \caption{Overview of the technological stack for the Material Planning domain. Solid lines show the current prototype setup; dashed elements represent the planned phases (direct Looker--Oracle connection, migration to production BigQuery) and the OpenMetadata governance extension.}
+    \label{fig:techstack_overview}
+\end{figure}
+
 \section[Backend Infrastructure]{Backend Infrastructure and Data Platform Architecture}
 \label{sec:backend_infrastructure}
 
@@ -21,7 +72,7 @@ As data models, historical partitions, and ETL routines are progressively refact
 and both environments remain active concurrently during the transitional period.
 
 The Material Planning domain illustrates how this strategy is applied in practice. The material requirements calculation described in \Cref{chap:demandforecast}
-runs as a nightly batch job on Oracle, which populates the core fact table \texttt{F\_MATERIAL\_PLANNING}.
+runs as a nightly batch job on Oracle and populates the core fact table, \texttt{F\_MATERIAL\_PLANNING}.
 Since the direct connection between Looker and Oracle was not yet available during the development of this work, the semantic model was prototyped against a
 BigQuery sandbox project (\texttt{material\_planning\_export}), into which the Oracle output tables were exported manually.
 This setup made it possible to design and validate the LookML model and the conversational agent on real data, but it is not sustainable as an operating solution,
@@ -288,6 +339,10 @@ explore: material_planning {
     user_attribute: piattaforma_autorizzata
   }
 
+  always_filter: {
+    filters: [l_um.um: "KG - Chilogrammi"]
+  }
+
   join: prodotto {
     from: l_art_jde
     view_label: "Prodotto"
@@ -336,6 +391,7 @@ explore: material_planning {
 \begin{itemize}
     \item \textbf{Backend connection:} The parameter \texttt{connection: "materialplanningbq"} currently points to the BigQuery sandbox described in \Cref{sec:backend_infrastructure}. Moving the model to Oracle, and later to production BigQuery, mainly requires changing this parameter and adapting dialect-specific SQL, while field definitions remain unchanged.
     \item \textbf{Row-Level Security:} The \texttt{access\_filter} block binds the user attribute \texttt{piattaforma\_autorizzata} to the platform code, so every query is automatically restricted to the platforms the user is authorized for.
+    \item \textbf{Unit-of-measure guardrail:} The measure \texttt{fabbisogno\_materiale} is a sum, but material requirements are expressed in different units (kilograms, square or linear meters, pieces). Summing across units would produce a number with no physical meaning. The \texttt{always\_filter} block therefore makes a unit-of-measure filter mandatory in every query on the Explore: it defaults to kilograms, and users can change its value but cannot remove it. When several units are selected, results must be broken down by unit, which is the strategy adopted by the conversational agent in \Cref{chap:conversational_agent}. The guardrail is thus enforced once in the model, instead of relying on each user or Look to remember it.
     \item \textbf{Role-playing dimensions:} The master table \texttt{l\_art\_jde} is joined twice, as \texttt{prodotto} (the finished product driving demand) and as \texttt{materiale} (the raw material or packaging consumed). The join-level \texttt{fields} parameter projects only the relevant attributes into each namespace, avoiding ambiguous field names while keeping a single view definition.
     \item \textbf{Hierarchical snowflaking:} Product lines (\texttt{l\_lin}) and families (\texttt{l\_fam}) are joined to the \texttt{prodotto} alias rather than to the fact table, forming a dimensional hierarchy while the fact table keeps its original grain.
 \end{itemize}
@@ -348,6 +404,17 @@ explore: material_planning {
     \caption{The \textit{Fabbisogno lordo materiali} Explore in Looker: the field picker exposes only the curated business namespaces defined in the LookML model, while technical identifiers remain hidden.}
     \label{fig:looker_explore}
 \end{figure}
+
+\subsection{Development Lifecycle and Version Control}
+\label{subsec:lookml_lifecycle}
+Because the semantic model is code, its evolution follows a software development lifecycle rather than ad-hoc changes to reports. The LookML project is connected to a Git repository, and Looker separates two environments:
+\begin{itemize}
+    \item \textbf{Development Mode:} each developer works on a personal Git branch and sees the effect of their changes in the Explore without affecting other users.
+    \item \textbf{Production Mode:} all business users, Looks, dashboards, and the conversational agent query the version of the model on the production branch.
+\end{itemize}
+
+Moving a change from development to production follows a controlled sequence. Before committing, the \textit{LookML Validator} checks the model for syntax errors, references to undefined fields, and invalid join definitions, while the \textit{Content Validator} identifies saved Looks and dashboards that would break because of renamed or removed fields. Changes are then committed to the developer's branch and proposed through a pull request; only after review and approval are they merged into the production branch and deployed.
+This workflow makes every change to a metric definition traceable (who changed it, when, and why) and reversible, and it is what makes the description of LookML as an auditable, version-controlled codebase concrete. It also connects the semantic layer to the organizational model of \Cref{sec:organizational_transformation}: Champions can propose changes to definitions, but these reach production only through a reviewed and validated process.
 
 \subsection{Semantic Modeling for Self-Service Exploration and AI Enablement}
 The codification of business logic and contextual metadata in LookML serves two purposes: giving the \textbf{Data \& AI Champions} governed self-service analytical capabilities, and providing a reliable semantic layer for conversational agents.
