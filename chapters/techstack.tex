@@ -340,12 +340,6 @@ explore: material_planning {
     user_attribute: piattaforma_autorizzata
   }
 
-  always_filter: {
-    filters: [l_um.um_selezionata: "KG - Chilogrammi"]
-  }
-
-  sql_always_where: ${l_um.um} = {% parameter l_um.um_selezionata %} ;;
-
   join: prodotto {
     from: l_art_jde
     view_label: "Prodotto"
@@ -390,32 +384,37 @@ explore: material_planning {
 }
 \end{lstlisting}
 
-The unit-of-measure selector referenced by the Explore is declared as a \texttt{parameter} in the \texttt{l\_um} view:
-
-\begin{lstlisting}[language=SQL, basicstyle=\footnotesize\ttfamily, caption={LookML Parameter for Single Unit-of-Measure Selection}, label={lst:lookml_um_param}]
-view: l_um {
-  # ... dimensions omitted ...
-
-  parameter: um_selezionata {
-    type: string
-    label: "Unita di misura"
-    allowed_value: { value: "KG - Chilogrammi" }
-    allowed_value: { value: "MQ - Metro quadrato" }
-    allowed_value: { value: "MT - Metro lineare" }
-    allowed_value: { value: "NR - Numero" }
-    default_value: "KG - Chilogrammi"
-  }
-}
-\end{lstlisting}
-
 \Cref{lst:lookml_model} shows how the principles introduced in the previous subsections are applied in the Explore configuration:
 \begin{itemize}
     \item \textbf{Backend connection:} The parameter \texttt{connection: "materialplanningbq"} currently points to the BigQuery sandbox described in \Cref{sec:backend_infrastructure}. Moving the model to Oracle, and later to production BigQuery, mainly requires changing this parameter and adapting dialect-specific SQL, while field definitions remain unchanged.
     \item \textbf{Row-Level Security:} The \texttt{access\_filter} block binds the user attribute \texttt{piattaforma\_autorizzata} to the platform code, so every query is automatically restricted to the platforms the user is authorized for.
-    \item \textbf{Unit-of-measure guardrail:} The measure \texttt{fabbisogno\_materiale} is a sum, but material requirements are expressed in different units (kilograms, square or linear meters, pieces). Summing across units would produce a number with no physical meaning. To prevent this, the unit of measure is selected through the parameter \texttt{um\_selezionata} (\Cref{lst:lookml_um_param}). Unlike an ordinary filter, a LookML \texttt{parameter} accepts exactly one value, chosen from a fixed list. The \texttt{sql\_always\_where} clause injects the selected unit into the \texttt{WHERE} clause of every query, while \texttt{always\_filter} keeps the selector always visible, with kilograms as the default. As a result, every query on the Explore refers to a single unit of measure: users can switch unit but cannot select several at once or remove the constraint. The rule is enforced once in the model rather than left to the attention of each user or Look; the trade-off is that comparing quantities across different units requires separate queries.
     \item \textbf{Role-playing dimensions:} The master table \texttt{l\_art\_jde} is joined twice, as \texttt{prodotto} (the finished product driving demand) and as \texttt{materiale} (the raw material or packaging consumed). The join-level \texttt{fields} parameter projects only the relevant attributes into each namespace, avoiding ambiguous field names while keeping a single view definition.
     \item \textbf{Hierarchical snowflaking:} Product lines (\texttt{l\_lin}) and families (\texttt{l\_fam}) are joined to the \texttt{prodotto} alias rather than to the fact table, forming a dimensional hierarchy while the fact table keeps its original grain.
 \end{itemize}
+
+\paragraph{Known limitation and planned improvement: units of measure}
+The current model leaves one aggregation risk open. The measure \texttt{fabbisogno\_materiale} is a sum, but material requirements are expressed in different units: kilograms, square or linear meters, and pieces. Summing quantities across units produces a number with no physical meaning. At present, the unit of measure is exposed as an ordinary filter, as shown in \Cref{fig:looker_selfservice,fig:looker_look}: it is up to the user, or to the author of a Look, to restrict each query to a single unit, and nothing in the model prevents several units from being selected or the filter from being removed.
+
+A planned evolution moves this rule into the model itself, as sketched in \Cref{lst:lookml_um_param}. The unit would be selected through a LookML \texttt{parameter}, which, unlike an ordinary filter, accepts exactly one value from a fixed list. The \texttt{sql\_always\_where} clause would inject the selected unit into the \texttt{WHERE} clause of every query, while \texttt{always\_filter} would keep the selector visible, with kilograms as the default. Every query on the Explore would thus refer to a single unit of measure, and the rule would be enforced once in the model rather than left to the attention of each user or Look. The trade-off is that comparing quantities expressed in different units would require separate queries.
+
+\begin{lstlisting}[language=SQL, basicstyle=\footnotesize\ttfamily, caption={Proposed LookML Configuration for Single Unit-of-Measure Selection (Not Yet Implemented)}, label={lst:lookml_um_param}]
+# view l_um: single-choice selector
+parameter: um_selezionata {
+  type: string
+  label: "Unita di misura"
+  allowed_value: { value: "KG - Chilogrammi" }
+  allowed_value: { value: "MQ - Metro quadrato" }
+  allowed_value: { value: "MT - Metro lineare" }
+  allowed_value: { value: "NR - Numero" }
+  default_value: "KG - Chilogrammi"
+}
+
+# explore material_planning: mandatory constraint
+always_filter: {
+  filters: [l_um.um_selezionata: "KG - Chilogrammi"]
+}
+sql_always_where: ${l_um.um} = {% parameter l_um.um_selezionata %} ;;
+\end{lstlisting}
 
 \Cref{fig:looker_explore} shows the resulting consumption surface as presented to business users in the Looker Explore interface. The field picker exposes only business-oriented namespaces derived from view labels and join aliases (e.g., \textit{Articolo}, \textit{Materiale}, \textit{Piattaforma/Deposito}, \textit{Linea}, \textit{Famiglia}), while hidden technical fields never appear. Expanding a namespace, such as \textit{Articolo} in the figure, reveals only the few dimensions projected through the join-level \texttt{fields} parameter. The interface is thus the visible counterpart of the curated semantic boundary: the whole Material Planning domain is reduced to a compact catalog of certified fields.
 
