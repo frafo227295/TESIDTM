@@ -16,12 +16,6 @@ George E.~P. Box and Gwilym~M. Jenkins.
 \newblock {\em Time Series Analysis: Forecasting and Control}.
 \newblock Holden-Day, San Francisco, CA, 1970.
 
-\bibitem{boyd2012critical}
-Danah Boyd and Kate Crawford.
-\newblock Critical questions for big data: Provocations for a cultural,
-  technological, and scholarly phenomenon.
-\newblock {\em Information, Communication \& Society}, 15(5):662--679, 2012.
-
 \bibitem{dama2024dmbok}
 {DAMA International}.
 \newblock {\em The DAMA Guide to the Data Management Body of Knowledge
@@ -48,18 +42,41 @@ Darren Edge, Ha~Trinh, Aidan Newman, Joshua Christopher, Andrew Evans, Shenghao
 \bibitem{googlecloudlookerca2024}
 {Google Cloud}.
 \newblock Best practices for configuring conversational analytics and ai agents
-  in looker, 2024.
+  in looker.
+\newblock
+  \url{https://cloud.google.com/looker/docs/conversational-analytics-looker-best-practices},
+  2024.
 \newblock Accessed: 2026-10-15.
 
 \bibitem{googlecloudlookerbp2024}
 {Google Cloud}.
-\newblock Lookml and explore best practices for high-performance queries, 2024.
+\newblock Lookml and explore best practices for high-performance queries.
+\newblock \url{https://cloud.google.com/looker/docs/best-practices}, 2024.
 \newblock Accessed: 2026-10-15.
+
+\bibitem{googlecloudlookeraa2026}
+{Google Cloud}.
+\newblock Advanced analytics in conversational analytics.
+\newblock
+  \url{https://docs.cloud.google.com/looker/docs/conversational-analytics-looker-advanced-analytics},
+  2026.
+\newblock Accessed: 2026-11-05.
+
+\bibitem{googlecloudlookercaoverview2026}
+{Google Cloud}.
+\newblock Conversational analytics in looker overview.
+\newblock
+  \url{https://docs.cloud.google.com/looker/docs/conversational-analytics-overview},
+  2026.
+\newblock Accessed: 2026-11-04.
 
 \bibitem{googlecloudlookeragents2026}
 {Google Cloud}.
 \newblock Create and manage explore data agents in looker conversational
-  analytics, 2026.
+  analytics.
+\newblock
+  \url{https://cloud.google.com/looker/docs/conversational-analytics-looker-data-agents},
+  2026.
 \newblock Accessed: 2026-10-15.
 
 \bibitem{gruber1993translation}
@@ -131,5 +148,11 @@ Pranitha Potturi.
 James Richardson, Kurt Schlegel, Rita Sallam, Austin Kronz, and Julian Sun.
 \newblock Magic quadrant for analytics and business intelligence platforms.
 \newblock Technical Report G00467317, Gartner, February 2021.
+
+\bibitem{vegalite2026}
+{UW Interactive Data Lab}.
+\newblock Vega-lite: A grammar of interactive graphics.
+\newblock \url{https://vega.github.io/vega-lite/}, 2026.
+\newblock Accessed: 2026-11-05.
 
 \end{thebibliography}

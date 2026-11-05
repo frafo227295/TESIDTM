@@ -19,51 +19,44 @@ Reallocating 'name_of_file' (item size: 1) to 6 items.
 The style file: plain.bst
 Reallocating 'name_of_file' (item size: 1) to 13 items.
 Database file #1: bibliography.bib
-Warning--entry type for "googlecloudlookerbp2024" isn't style-file defined
---line 383 of file bibliography.bib
-Warning--entry type for "googlecloudlookerca2024" isn't style-file defined
---line 399 of file bibliography.bib
-Warning--entry type for "googlecloudlookeragents2026" isn't style-file defined
---line 415 of file bibliography.bib
-You've used 22 entries,
+You've used 24 entries,
             2118 wiz_defined-function locations,
-            632 strings with 8166 characters,
-and the built_in function-call counts, 6838 in all, are:
-= -- 629
-> -- 415
+            639 strings with 8665 characters,
+and the built_in function-call counts, 7189 in all, are:
+= -- 669
+> -- 423
 < -- 2
-+ -- 170
-- -- 144
-* -- 477
-:= -- 1219
-add.period$ -- 67
-call.type$ -- 22
-change.case$ -- 130
++ -- 174
+- -- 146
+* -- 469
+:= -- 1284
+add.period$ -- 79
+call.type$ -- 24
+change.case$ -- 137
 chr.to.int$ -- 0
-cite$ -- 22
-duplicate$ -- 235
-empty$ -- 492
-format.name$ -- 144
-if$ -- 1368
+cite$ -- 24
+duplicate$ -- 245
+empty$ -- 531
+format.name$ -- 146
+if$ -- 1453
 int.to.chr$ -- 0
-int.to.str$ -- 22
-missing$ -- 27
-newline$ -- 113
-num.names$ -- 44
-pop$ -- 163
+int.to.str$ -- 24
+missing$ -- 26
+newline$ -- 129
+num.names$ -- 48
+pop$ -- 181
 preamble$ -- 1
-purify$ -- 115
+purify$ -- 120
 quote$ -- 0
-skip$ -- 146
+skip$ -- 153
 stack$ -- 0
-substring$ -- 255
-swap$ -- 22
+substring$ -- 240
+swap$ -- 24
 text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 68
+type$ -- 76
 warning$ -- 0
-while$ -- 56
-width$ -- 24
-write$ -- 244
-(There were 3 warnings)
+while$ -- 58
+width$ -- 26
+write$ -- 275

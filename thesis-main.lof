@@ -1,10 +1,17 @@
 \babel@toc {english}{}\relax 
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces The Vertically Integrated Supply Chain Architecture of Amadori S.p.A.}}{6}{figure.2.1}%
+\contentsline {figure}{\numberline {2.1}{\ignorespaces The Vertically Integrated Supply Chain Architecture of Amadori S.p.A.}}{4}{figure.2.1}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces Material planning demand decision tree: chronological data source selection, product archetype routing (PFL vs. PN/PFN), platform allocation, and sequential BOM explosion.}}{12}{figure.3.1}%
-\addvspace {10\p@ }
-\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Material planning demand decision tree: chronological data source selection, product archetype routing (PFL vs. PN/PFN), platform allocation, and sequential BOM explosion.}}{10}{figure.3.1}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {5.1}{\ignorespaces Overview of the technological stack for the Material Planning domain. Solid lines show the current prototype setup; dashed elements represent the planned phases (direct Looker--Oracle connection, migration to production BigQuery) and the OpenMetadata governance extension.}}{22}{figure.5.1}%
+\contentsline {figure}{\numberline {5.2}{\ignorespaces The \textit {Fabbisogno lordo materiali} Explore in Looker: the field picker exposes only the curated business namespaces defined in the LookML model, while technical identifiers remain hidden.}}{33}{figure.5.2}%
+\contentsline {figure}{\numberline {5.3}{\ignorespaces Self-service exploration in Looker: gross ingredient requirements for a single platform, broken down by product line and forecast quarter.}}{35}{figure.5.3}%
+\contentsline {figure}{\numberline {5.4}{\ignorespaces The exploration of \Cref {fig:looker_selfservice} saved as a reusable Look (\textit {Materials by line and quarter}), consumed by business users in read-only mode; platform, material type, and unit of measure remain adjustable filters.}}{36}{figure.5.4}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {6.1}{\ignorespaces \textit {Chat with Dashboard} in Looker: the Gemini side panel opened on a Material Planning dashboard, with suggested starter questions.}}{43}{figure.6.1}%
+\contentsline {figure}{\numberline {6.2}{\ignorespaces \textit {Chat with Explore} in Looker: the conversation is started from the \textit {Fabbisogno lordo materiali} Explore through the \textit {Start a conversation} button (highlighted).}}{43}{figure.6.2}%
+\contentsline {figure}{\numberline {6.3}{\ignorespaces Bar chart with a linear scale produced by the agent: the largest item hides all the others.}}{51}{figure.6.3}%
+\contentsline {figure}{\numberline {6.4}{\ignorespaces Chart requested with a logarithmic scale: the answer states that it was generated, but the chart is empty.}}{51}{figure.6.4}%

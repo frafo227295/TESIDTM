@@ -23,16 +23,16 @@ and, finally, the metadata platform planned as a future governance extension (\C
         lbl/.style={font=\scriptsize, fill=white, inner sep=1.5pt, align=center}
     ]
         % data platform
-        \node[box, text width=38mm] (oracle) {\textbf{Oracle} (on-premises)\\[1pt] nightly Material Planning batch\\ {\scriptsize\texttt{F\_MATERIAL\_PLANNING}}};
+        \node[box, text width=38mm] (oracle) {\textbf{Oracle} \\(on-premises)};
         \node[box, above right=6mm and 14mm of oracle] (bqsbx) {\textbf{BigQuery sandbox}\\ prototype, manual export};
         \node[planned, below right=6mm and 14mm of oracle] (bqprod) {\textbf{BigQuery production}\\ target};
 
         % semantic layer
-        \node[box, right=16mm of bqsbx.east |- oracle.east, anchor=west, minimum height=38mm, text width=36mm] (looker) {\textbf{Looker}\\ \textbf{Semantic Layer}\\[4pt] LookML views and Explore\\ measures, synonyms\\ \texttt{access\_filter}\\[4pt] \textit{Git repository}\\ \textit{(dev mode, pull requests)}};
+        \node[box, right=16mm of bqsbx.east |- oracle.east, anchor=west, minimum height=38mm, text width=36mm] (looker) {\textbf{Looker}\\ \textbf{Semantic Layer}\\[4pt] LookML views and Models};
 
         % consumers
         \node[box, above right=3mm and 10mm of looker.east, anchor=south west] (bi) {\textbf{Explore, Looks, dashboards}\\ Champions and business users};
-        \node[box, below right=3mm and 10mm of looker.east, anchor=north west] (agent) {\textbf{Gemini in Looker}\\ conversational agent\\ (\Cref{chap:conversational_agent})};
+        \node[box, below right=3mm and 10mm of looker.east, anchor=north west] (agent) {\textbf{Gemini in Looker}\\ Conversational AI Agents};
 
         % metadata platform
         \node[planned, below=14mm of bqprod.south -| looker.south, anchor=north, text width=80mm, minimum height=10mm] (omd) {\textbf{OpenMetadata} (roadmap)\\ business glossary, lineage, knowledge graph};
@@ -143,7 +143,7 @@ The operationalization of the Material Planning engine described in \Cref{chap:d
 
 The primary fact view, \texttt{f\_material\_planning}, defines the daily gross material requirements across forecast dates, finished items, logistics and production platforms, and packaging or ingredient components:
 
-\begin{lstlisting}[language=SQL, basicstyle=\footnotesize\ttfamily, caption={LookML Definition for Material Planning Fact View (Partial Excerpt)}, label={lst:lookml_fact}]
+\begin{lstlisting}[language=SQL, basicstyle=\footnotesize\ttfamily, caption={LookML definition for Material Planning fact view (partial excerpt)}, label={lst:lookml_fact}]
 view: f_material_planning {
   sql_table_name: `gsc-dp-mt-plan-sbx.material_planning_export.F_MATERIAL_PLANNING` ;;
   label: "Fabbisogno lordo materiali"
@@ -217,7 +217,7 @@ Dimensional master views provide the descriptive attributes required to contextu
 
 Standard master views maintain a direct one-to-one correspondence between the physical database table and the LookML view. A representative example is \texttt{l\_ptf}, which encapsulates logistics platforms, manufacturing plants, and distribution centers:
 
-\begin{lstlisting}[language=SQL, basicstyle=\footnotesize\ttfamily, caption={LookML Definition for Standard Platform Master View (Partial Excerpt)}, label={lst:lookml_ptf}]
+\begin{lstlisting}[language=SQL, basicstyle=\footnotesize\ttfamily, caption={LookML definition for standard Platform master view (partial excerpt)}, label={lst:lookml_ptf}]
 view: l_ptf {
   sql_table_name: `gsc-dp-mt-plan-sbx.material_planning_export.L_PTF` ;;
   label: "Piattaforma"
@@ -263,7 +263,7 @@ Architecturally, modeling this registry could have followed two competing paradi
 
 Following the second approach, \texttt{l\_art\_jde} unifies the entire item schema within a single definition:
 
-\begin{lstlisting}[language=SQL, basicstyle=\footnotesize\ttfamily, caption={LookML Master Articles View (Representative Excerpt)}, label={lst:lookml_master}]
+\begin{lstlisting}[language=SQL, basicstyle=\footnotesize\ttfamily, caption={LookML master Articles view (representative excerpt)}, label={lst:lookml_master}]
 view: l_art_jde {
   sql_table_name: `gsc-dp-mt-plan-sbx.material_planning_export.L_ART_JDE` ;;
   view_label: "Articolo"
@@ -327,7 +327,7 @@ As documented in \Cref{lst:lookml_master}, \texttt{l\_art\_jde} defines the comp
 \subsection{Model definition: relational joins and access perimeter}
 The relational orchestration of the Material Planning domain is codified within the LookML model file (\texttt{material\_planning.model.lkml}). The model specifies the active database connection, imports the view definitions, and defines the join topology centered around the primary fact view:
 
-\begin{lstlisting}[language=SQL, basicstyle=\footnotesize\ttfamily, caption={LookML Model and Explore Configuration for Material Planning (Simplified Excerpt)}, label={lst:lookml_model}]
+\begin{lstlisting}[language=SQL, basicstyle=\footnotesize\ttfamily, caption={LookML Model and Explore configuration for Material Planning (simplified excerpt)}, label={lst:lookml_model}]
 connection: "materialplanningbq"
 
 include: "/views/*.view.lkml"
@@ -397,7 +397,7 @@ The current model leaves one aggregation risk open. The measure \texttt{fabbisog
 
 A planned evolution moves this rule into the model itself, as sketched in \Cref{lst:lookml_um_param}. The unit would be selected through a LookML \texttt{parameter}, which, unlike an ordinary filter, accepts exactly one value from a fixed list. The \texttt{sql\_always\_where} clause would inject the selected unit into the \texttt{WHERE} clause of every query, while \texttt{always\_filter} would keep the selector visible, with kilograms as the default. Every query on the Explore would thus refer to a single unit of measure, and the rule would be enforced once in the model rather than left to the attention of each user or Look. The trade-off is that comparing quantities expressed in different units would require separate queries.
 
-\begin{lstlisting}[language=SQL, basicstyle=\footnotesize\ttfamily, caption={Proposed LookML Configuration for Single Unit-of-Measure Selection (Not Yet Implemented)}, label={lst:lookml_um_param}]
+\begin{lstlisting}[language=SQL, basicstyle=\footnotesize\ttfamily, caption={Proposed LookML configuration for single unit-of-measure selection (not yet implemented)}, label={lst:lookml_um_param}]
 # view l_um: single-choice selector
 parameter: um_selezionata {
   type: string
@@ -455,7 +455,7 @@ To address this, the operating model described in \Cref{sec:organizational_trans
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{figures/looker_selfservice.png}
-    \caption{Self-service exploration in Looker: gross ingredient requirements (kg) for a single platform, broken down by product line and forecast quarter.}
+    \caption{Self-service exploration in Looker: gross ingredient requirements for a single platform, broken down by product line and forecast quarter.}
     \label{fig:looker_selfservice}
 \end{figure}
 
@@ -492,7 +492,7 @@ Looker operates as the centralized semantic compiler and enforces metric governa
 To decouple business glossary governance from technical codebases and automate end-to-end lineage across heterogeneous systems, the target architecture incorporates OpenMetadata as a future governance milestone. OpenMetadata is an open-source, schema-first metadata management platform built upon standard JSON schemas for data discovery, governance, and quality profiling. Within this planned evolution, OpenMetadata expands enterprise governance beyond the analytical boundary through three foundational capabilities:
 
 \begin{enumerate}
-    \item \textbf{Centralized, Low-Code Business Glossary:} Business definitions are transitioned from plain-text LookML parameters into an intuitive, low-code enterprise catalog accessible to non-technical stakeholders \cite{dama2024dmbok}. This interface empowers domain stewards across planning, supply chain, and commercial divisions to manage term ownership, certify metric definitions, and approve terminology changes collaboratively without submitting pull requests to a Git repository.
+    \item \textbf{Centralized, Low-Code Business Glossary:} Business definitions are transitioned from plain-text LookML parameters into an intuitive, low-code enterprise catalog accessible to non-technical stakeholders \cite{dama2024dmbok}. This interface empowers Data \& AI Champions across planning, supply chain, and commercial divisions to manage term ownership, certify metric definitions, and approve terminology changes collaboratively without submitting pull requests to a Git repository.
     \item \textbf{Automated End-to-End Data Lineage:} The platform establishes systematic traceability across the entire data lifecycle by connecting source catalogs directly to consuming assets. By tracing data assets from their operational origin in the on-premises Oracle database, through cloud landing zones and transformations in Google BigQuery, down to the semantic entities compiled by Looker, automated lineage enables engineering teams to perform proactive impact analysis. Practitioners can determine which downstream Explores, operational dashboards, or predictive workloads would be affected prior to executing upstream schema migrations.
     \item \textbf{Enterprise Knowledge Graph Construction:} Enterprise metadata entities---including physical tables, pipeline orchestration schedules, semantic metric definitions, and access policies---are modeled as an interconnected knowledge graph \cite{hogan2021knowledge}. This structure makes data provenance and quality explicit and can serve as an additional grounding source for AI workflows.
 \end{enumerate}
