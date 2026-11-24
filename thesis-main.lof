@@ -12,6 +12,7 @@
 \contentsline {figure}{\numberline {5.4}{\ignorespaces The exploration of \Cref {fig:looker_selfservice} saved as a reusable Look (\textit {Materials by line and quarter}), consumed by business users in read-only mode; platform, material type, and unit of measure remain adjustable filters.}}{36}{figure.5.4}%
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {6.1}{\ignorespaces \textit {Chat with Dashboard} in Looker: the Gemini side panel opened on a Material Planning dashboard, with suggested starter questions.}}{43}{figure.6.1}%
-\contentsline {figure}{\numberline {6.2}{\ignorespaces \textit {Chat with Explore} in Looker: the conversation is started from the \textit {Fabbisogno lordo materiali} Explore through the \textit {Start a conversation} button (highlighted).}}{43}{figure.6.2}%
-\contentsline {figure}{\numberline {6.3}{\ignorespaces Bar chart with a linear scale produced by the agent: the largest item hides all the others.}}{51}{figure.6.3}%
+\contentsline {figure}{\numberline {6.2}{\ignorespaces \textit {Chat with Explore} in Looker: the conversation is started from the \textit {Material Planning} Explore through the \textit {Start a conversation} button (highlighted).}}{43}{figure.6.2}%
+\contentsline {figure}{\numberline {6.3}{\ignorespaces Bar chart with a linear scale produced by the agent: the largest item hides all the others.}}{50}{figure.6.3}%
 \contentsline {figure}{\numberline {6.4}{\ignorespaces Chart requested with a logarithmic scale: the answer states that it was generated, but the chart is empty.}}{51}{figure.6.4}%
+\addvspace {10\p@ }

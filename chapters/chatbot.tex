@@ -1,8 +1,8 @@
 %----------------------------------------------------------------------------------------
-% CHAPTER 6: CONVERSATIONAL ANALYTICS AND AGENTIC WORKFLOWS
+% CHAPTER 6: CONVERSATIONAL ANALYTICS WITH GEMINI IN LOOKER
 %----------------------------------------------------------------------------------------
 
-\chapter{Conversational Analytics and Agentic Workflows with Gemini in Looker}
+\chapter{Conversational Analytics with Gemini in Looker}
 \label{chap:conversational_agent}
 \chaptermark{Conversational Analytics}
 \emergencystretch=2em % lets long \texttt field names wrap without overflowing the margin
@@ -10,11 +10,11 @@
 \section[Introduction]{Introduction and Business Motivation}
 \label{sec:agent_introduction}
 
-The semantic layer described in \Cref{chap:techstack} gives the Material Planning domain a single, certified definition of its metrics, and the Explore, Looks, and dashboards built on it already allow Data \& AI Champions to answer many questions without the central data team. Self-service exploration, however, still requires users to know the model: which fields to select, which filters to apply, and how to read the result. For planners, procurement managers, and plant supervisors who need a quick answer to a specific question (for example, how much of a given packaging material a plant will need next month), this remains a barrier.
+The semantic layer described in \Cref{chap:techstack} gives the Material Planning domain a single, certified definition of its metrics, and the Explore, Looks, and dashboards built on it already allow Data \& AI Champions to answer many questions without the central data team. Self-service exploration, however, still requires users to know the model: which fields to select, which filters to apply, and how to read the result. For business users who need a quick answer to a specific question, this could remain a barrier.
 
 This chapter describes how the barrier was lowered by introducing a conversational agent built with the Conversational Analytics feature of \textbf{Gemini in Looker}. The agent is not used as a generic Text-to-SQL generator working on raw tables, an approach prone to wrong joins, incorrect aggregations, and hallucinated field names. Instead, it is bound to the LookML model of \Cref{sec:looker_lookml}: it can only use the certified dimensions, measures, and joins of the \texttt{material\_planning} Explore, and every query it produces is compiled by Looker and subject to the same access rules as any other query.
 
-Binding the agent to the semantic layer ensures that metrics are computed according to the certified definitions, but it does not ensure that the agent always chooses the right fields and filters. Most of the work described in this chapter addresses this second problem. \Cref{sec:conversational_modalities} introduces the conversational modalities available in Looker and the one adopted. \Cref{sec:system_instructions} describes the system instructions that encode domain knowledge and operational defaults, and \Cref{sec:golden_queries} the golden queries that complement them with reference examples. \Cref{sec:tuning_and_migration} presents the iterative tuning based on the agent's reasoning traces and the resulting migration of business logic upstream, \Cref{sec:visualization_governance} discusses the limits observed in the charts produced by the agent, and \Cref{sec:data_office_transformation} discusses the impact on the role of the Data Office.
+Binding the agent to the semantic layer ensures that metrics are computed according to the certified definitions, but it does not ensure that the agent always chooses the right fields and filters. Most of the work described in this chapter addresses this second problem. \Cref{sec:conversational_modalities} introduces the conversational modalities available in Looker and the one adopted. \Cref{sec:system_instructions} describes the system instructions that encode domain knowledge and operational defaults, and \Cref{sec:verified_queries} the verified queries that complement them with reference examples. \Cref{sec:tuning_and_migration} presents the iterative tuning based on the agent's reasoning traces and the resulting migration of business logic upstream, \Cref{sec:visualization_governance} discusses the limits observed in the charts produced by the agent, and \Cref{sec:data_office_transformation} discusses the impact on the role of the Data Office.
 
 \section[Looker Conversational Modalities]{Conversational Modalities in Looker}
 \label{sec:conversational_modalities}
@@ -26,7 +26,7 @@ Looker offers three ways to query data in natural language \cite{googlecloudlook
     \item \textbf{Conversational Analytics data agents:} named, persistent agents created by a developer and shared with users \cite{googlecloudlookeragents2026}. Each agent can be connected to up to five Explores and has its own instructions describing the business context. When \textit{Advanced Analytics} is enabled, the agent can also translate a question into Python code and execute it, for analyses and charts that go beyond a single query.
 \end{enumerate}
 
-\Cref{fig:chat_with_dashboard,fig:chat_with_explore} show the first two modalities on the Material Planning assets. In the first, the side panel is opened on a dashboard built from the Look of \Cref{fig:looker_look} and proposes starter questions, such as the main takeaways or the filters currently applied. In the second, the conversation is started directly from the \texttt{material\_planning} Explore, labeled \textit{Fabbisogno lordo materiali} in the Looker interface.
+\Cref{fig:chat_with_dashboard,fig:chat_with_explore} show the first two modalities on the Material Planning assets. In the first, the side panel is opened on a dashboard built from the Look of \Cref{fig:looker_look} and proposes starter questions, such as the main takeaways or the filters currently applied. In the second, the conversation is started directly from the \texttt{material\_planning} Explore.
 
 \begin{figure}[htbp]
     \centering
@@ -38,77 +38,73 @@ Looker offers three ways to query data in natural language \cite{googlecloudlook
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{figures/chatwithexplore.png}
-    \caption{\textit{Chat with Explore} in Looker: the conversation is started from the \textit{Fabbisogno lordo materiali} Explore through the \textit{Start a conversation} button (highlighted).}
+    \caption{\textit{Chat with Explore} in Looker: the conversation is started from the \textit{Material Planning} Explore through the \textit{Start a conversation} button (highlighted).}
     \label{fig:chat_with_explore}
 \end{figure}
 
-The third modality was adopted for the Material Planning use case, for three reasons. First, only a data agent can be given persistent instructions: the domain taxonomy, defaults, and rules described in \Cref{sec:system_instructions} would otherwise have to be repeated by each user in every conversation. The same holds for the golden queries of \Cref{sec:golden_queries}, which are supported only by data agents. Second, the agent is a single governed asset: it is defined once, tested, and shared, so that all users query the data through the same validated configuration. Third, the agent combines Advanced Analytics with the persistent instructions, so that requests such as peak detection or statistical analysis, which a single Looker query cannot answer, are also handled according to the domain rules; its use for charts is discussed in \Cref{sec:visualization_governance}. The agent is connected to the \texttt{material\_planning} Explore and, depending on the question, answers with text, a native Looker chart, or a chart produced in Python.
+The third modality was adopted for the Material Planning use case, for three reasons. First, only a data agent can be given persistent instructions: the domain taxonomy, defaults, and rules described in \Cref{sec:system_instructions} would otherwise have to be repeated by each user in every conversation. The same holds for the verified queries of \Cref{sec:verified_queries}, which are supported only by data agents. Second, the agent is a single governed asset: it is defined once, tested, and shared, so that all users query the data through the same validated configuration. Third, the agent combines Advanced Analytics with the persistent instructions, so that requests such as peak detection or statistical analysis, which a single Looker query cannot answer, are also handled according to the domain rules. The agent is connected to the \texttt{material\_planning} Explore and, depending on the question, answers with text, a native Looker chart, or a chart produced in Python.
 
-\section[System Instructions and Domain Contextualization]{System Instructions: Codifying Enterprise Domain Knowledge}
+\section{System Instructions: Encoding Domain Knowledge}
 \label{sec:system_instructions}
 
-The LookML model tells the agent which fields exist and how they are computed, but not how the Material Planning team talks about its data, which values to assume when a question is incomplete, or how results should be presented. This knowledge is provided through the agent's \textbf{system instructions}, which are organized in four blocks: role and response policy, business terminology, default behaviors and filters, and visualization guidelines. The first three are described in this section; the visualization guidelines are discussed in \Cref{sec:visualization_governance}.
+The LookML model tells the agent which fields exist and how they are computed, but not how the Material Planning users talk about their data, which values to assume when a question is incomplete, or how results should be presented. This knowledge is provided through the agent's \textbf{system instructions}. Looker does not prescribe a structure for them: for this agent, they were organized in four blocks, namely role and response policy, business terminology, default behaviors and filters, and visualization guidelines. The first three are described in this section; the visualization guidelines are discussed in \Cref{sec:visualization_governance}.
 
 \paragraph{Role and response policy}
-The agent is defined as an expert data assistant for Amadori's Material Planning, with a professional, analytical, and concise tone. Two rules govern its answers: they must be direct and based on data, without unnecessary preambles, and every answer must end with two or three suggested follow-up questions or next analytical steps. The second rule turns a single answer into a guided exploration: after a question on total requirements, for example, the agent may suggest breaking the result down by material type or by platform.
+The agent is defined as an expert data assistant for Amadori's Material Planning, with a strictly professional, analytical, and concise tone (\Cref{lst:agent_role}). Two rules govern its answers. First, they must be direct and based on data, without unnecessary preambles. Second, the agent must always anticipate the user's needs: every answer ends with two or three relevant follow-up questions or next analytical steps. This second rule turns a single answer into a guided exploration: after a question on total requirements, for example, the agent may suggest breaking the result down by material type or by platform.
 
-\paragraph{Business terminology}
-The instructions define the terms that planners use and link them, where possible, to fields of the model:
-\begin{itemize}
-    \item \textbf{Gross requirement (\textit{fabbisogno lordo}):} the total quantity of material needed, derived from finished product demand, corresponding to the measure \texttt{fabbisogno\_\allowbreak materiale}.
-    \item \textbf{PFL (\textit{prodotto finito in linea}):} a labeled, market-ready product whose BOM contains the complete set of ingredients, primary packaging, and labels. Mapped through synonyms to the dimension \texttt{prodotto.\allowbreak prodotto}.
-    \item \textbf{PN (\textit{prodotto neutro}):} an unlabeled physical item whose associated BOM includes only ingredients and primary packaging. Mapped through synonyms to the dimension \texttt{prodotto.\allowbreak articolo\_\allowbreak neutro\_\allowbreak cod}.
-    \item \textbf{PFN (\textit{prodotto finito da neutro}):} the commercial variations derived from a Neutral Product, with a BOM containing exclusively the specific finished label(s). Mapped through synonyms to the dimension \texttt{prodotto.\allowbreak prodotto}.
-\end{itemize}
-These definitions, already introduced in \Cref{chap:demandforecast}, allow the agent to interpret questions such as ``how many neutral products require this packaging?'' without the user having to know which field encodes the concept.
+\begin{lstlisting}[basicstyle=\footnotesize\ttfamily, breaklines=true, columns=fullflexible, caption={Excerpt of the agent's system instructions (role and response policy)}, label={lst:agent_role}]
+# ROLE
+You are an expert Data Assistant for Amadori's Material Planning.
+Your tone is strictly professional, analytical, and concise.
 
-\paragraph{Default behaviors and filters}
-Most planning questions are incomplete: they do not specify a measure, a platform, or a time horizon. Rather than asking the user each time, the instructions define explicit defaults (\Cref{lst:agent_instructions}):
-\begin{itemize}
-    \item \textbf{Default measure:} words such as ``fabbisogno'', ``quantità'', or ``domanda'' are always mapped to \texttt{fabbisogno\_\allowbreak materiale}; \texttt{casse\_\allowbreak articolo} is used for finished product volumes.
-    \item \textbf{Default platform perimeter:} when a question refers to platforms generically, or does not mention any, the query is restricted to the platforms relevant to material planning. The instructions present this filter as an absolute requirement.
-    \item \textbf{Default time horizon:} operational questions without a horizon cover the period from today to the end of the following month; analytical or strategic questions cover the whole available forecast horizon.
-    \item \textbf{Exact match on codes:} codes provided by the user are treated as exact matches. This rule was added during the tuning process and is discussed in \Cref{sec:tuning_and_migration}.
-\end{itemize}
-
-\begin{lstlisting}[basicstyle=\footnotesize\ttfamily, breaklines=true, columns=fullflexible, escapechar=|, literate={`}{{\char18}}1 {à}{{\`{a}}}1 {è}{{\`{e}}}1 {é}{{\'{e}}}1 {ì}{{\`{i}}}1 {ò}{{\`{o}}}1 {ù}{{\`{u}}}1, caption={Excerpt of the agent's system instructions (default behaviors and filters), as configured in Looker}, label={lst:agent_instructions}]
-# COMPORTAMENTI PREDEFINITI E LOGICA DEI FILTRI
-Misura Predefinita:
-  - Quando gli utenti menzionano fabbisogni, quantità o domanda ("fabbisogno",
-    "quantità", "domanda"), calcola sempre utilizzando la misura
-    `f_material_planning.fabbisogno_materiale`.
-  - Misura secondaria per il volume dei prodotti finiti:
-    `f_material_planning.casse_articolo`.
-
-Filtro Piattaforma Predefinito (Obbligatorio):
-  - Applica sempre un filtro fisso su `f_material_planning.piattaforma_cod`
-    IN ("S01", "S02", "S04", "S05", "S10", "S50") ogni volta che sono coinvolti
-    depositi/piattaforme o quando non viene specificata una piattaforma
-    specifica. Consideralo un requisito assoluto.
-
-Filtro Data Predefinito:
-  - Query operative / standard: Se non |\`{e}| specificato un orizzonte temporale,
-    filtra `f_material_planning.data_previsione_date` dalla data odierna alla
-    fine del mese successivo.
-  - Query di analisi / strategiche: Utilizza come intervallo di date tutto
-    l'orizzonte di previsione disponibile.
+# RESPONSE POLICY
+  - Provide direct, data-based answers, without unnecessary preambles.
+  - Always anticipate the user's needs: at the end of each answer, suggest
+    2-3 relevant follow-up questions or next analytical steps.
 \end{lstlisting}
 
-\paragraph{Limitations and future improvements}
-Some domain knowledge is currently handled only in the instructions, or not handled at all, because the model does not yet support it. These cases are candidates for the same upstream migration described in \Cref{sec:tuning_and_migration}:
+\paragraph{Business terminology}
+The instructions define the terms that business users use and link them, where possible, to fields of the model:
 \begin{itemize}
-    \item \textbf{Platform perimeter as a model constraint:} the default perimeter is enforced only by the agent's instructions, so it does not apply to Explore users and depends on the agent following them. Declaring it in the Explore as an \texttt{always\_filter} with the same default values would make it part of the model and apply it to every consumer, while still allowing users to change it explicitly.
-    \item \textbf{Identification of labels:} labels cannot currently be distinguished reliably from other packaging materials. Recognizing them from text patterns in the material description proved too weak, since short strings such as ``Et'' also occur in unrelated descriptions. A robust solution requires a dedicated attribute in the item master data, brought into the backend as was done for the material type (\Cref{sec:tuning_and_migration}).
+    \item \textbf{Gross requirement (\textit{fabbisogno}):} the total quantity of material needed, derived from finished product demand, corresponding to the measure \texttt{fabbisogno\_\allowbreak materiale}.
+    \item \textbf{PFL (\textit{prodotto finito in linea}):} a labeled, market-ready product whose BOM contains the complete set of ingredients, primary packaging, and labels. Mapped through synonyms to the dimension \texttt{prodotto.\allowbreak prodotto}; PFL items have no associated neutral product, so \texttt{prodotto.\allowbreak articolo\_\allowbreak neutro\_\allowbreak cod} is set to 0.
+    \item \textbf{PN (\textit{prodotto neutro}):} an unlabeled physical item whose associated BOM includes only ingredients and primary packaging. Mapped through synonyms to the dimension \texttt{prodotto.\allowbreak articolo\_\allowbreak neutro\_\allowbreak cod}; PN items do not appear as rows of \texttt{prodotto}, but only as values of this field in the rows of the PFN items derived from them.
+    \item \textbf{PFN (\textit{prodotto finito da neutro}):} the commercial variations derived from a PN, with a BOM containing exclusively the specific finished label(s). Mapped through synonyms to the dimension \texttt{prodotto.\allowbreak prodotto}; PFN items are distinguished from PFL items by \texttt{prodotto.\allowbreak articolo\_\allowbreak neutro\_\allowbreak cod}, which contains the code of the parent PN.
 \end{itemize}
+These definitions, already introduced in \Cref{chap:demandforecast}, allow the agent to interpret questions such as ``how many PFLs require this packaging?'' without the user having to know which field encodes the concept.
 
-\section[Golden Queries]{Golden Queries: Teaching the Agent by Example}
-\label{sec:golden_queries}
+\paragraph{Default behaviors and filters}
+Most planning questions are incomplete: they do not specify a measure, a platform, or a time horizon. Asking the user for each missing element would interrupt almost every conversation, so the instructions define explicit defaults instead (\Cref{lst:agent_instructions}). Words such as ``requirement'', ``quantity'', or ``demand'' are always mapped to the gross requirement measure, \texttt{fabbisogno\_\allowbreak materiale}, while \texttt{casse\_\allowbreak articolo} is reserved for finished product volumes. When a question refers to platforms generically, or does not mention any, the query is restricted to the platforms relevant to material planning, a filter that the instructions present as an absolute requirement; its origin, and how it was later made largely redundant by the model, are discussed in \Cref{sec:tuning_and_migration}. The time horizon depends on the kind of question: operational questions without a horizon cover the period from today to the end of the following month, while analytical or strategic questions cover the whole available forecast horizon. A further rule, which treats codes provided by the user as exact matches, was added later during tuning and is also discussed in \Cref{sec:tuning_and_migration}.
 
-The system instructions describe the domain through general rules. Looker data agents offer a complementary mechanism: \textbf{golden queries}, called \textit{verified queries} in the Looker interface~\cite{googlecloudlookeragents2026}. A golden query pairs a question in natural language with the Explore query that answers it correctly. The developer writes the question and links the URL of an Explore in which fields, filters, and visualization have already been set. These pairs act as reference examples: when a user asks a similar question, the agent can rely on a verified mapping between business terms and the fields and filters of the model, instead of inferring it.
+\begin{lstlisting}[basicstyle=\footnotesize\ttfamily, breaklines=true, columns=fullflexible, literate={`}{{\char18}}1 {à}{{\`{a}}}1, caption={Excerpt of the agent's system instructions (default behaviors and filters)}, label={lst:agent_instructions}]
+# DEFAULT BEHAVIORS AND FILTER LOGIC
+Default Measure:
+  - When users mention requirements, quantities, or demand ("fabbisogno",
+    "quantità", "domanda"), always compute using the measure
+    `f_material_planning.fabbisogno_materiale`.
+  - Secondary measure for finished product volumes:
+    `f_material_planning.casse_articolo`.
 
-The documentation sets some constraints. Golden queries are available only for data agents, not for Chat with Explore or Chat with Dashboard; they must refer to an Explore connected to the agent; they do not support pivots or custom fields. No more than 30 to 50 pairs per agent are recommended, covering different types of questions and a variety of filters and filter values.
+Default Platform Filter (Mandatory):
+  - Always apply a fixed filter on `f_material_planning.piattaforma_cod`
+    IN ("S01", "S02", "S04", "S05", "S10", "S50") whenever warehouses or
+    platforms are involved or when no specific platform is given.
+    Treat this as an absolute requirement.
 
-Four golden queries were defined for the Material Planning agent (\Cref{tab:golden_queries}). The questions, originally in Italian, are translated here. Each one covers terms or rules that the agent could not derive from the model alone.
+Default Date Filter:
+  - Operational / standard queries: if no time horizon is specified,
+    filter `f_material_planning.data_previsione_date` from today to the
+    end of the following month.
+  - Analytical / strategic queries: use the whole available forecast
+    horizon as the date range.
+\end{lstlisting}
+
+\section[Verified Queries]{Verified Queries: Teaching the Agent by Example}
+\label{sec:verified_queries}
+
+The system instructions describe the domain through general rules. Looker data agents offer a complementary mechanism: \textbf{verified queries} \cite{googlecloudlookeragents2026}. A verified query pairs a question in natural language with the Explore query that answers it correctly. The developer writes the question and links the URL of an Explore in which fields, filters, and visualization have already been set. These pairs act as reference examples: when a user asks a similar question, the agent can rely on a verified mapping between business terms and the fields and filters of the model, instead of inferring it.
+
+Four verified queries were defined for the Material Planning agent (\Cref{tab:verified_queries}). Each one covers terms or rules that the agent may not derive correctly from the model alone.
 
 \begin{table}[htbp]
 \centering
@@ -117,39 +113,31 @@ Four golden queries were defined for the Material Planning agent (\Cref{tab:gold
 \begin{tabularx}{\textwidth}{l >{\raggedright\arraybackslash}p{3.6cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X}
 \hline
 \textbf{ID} & \textbf{Question} & \textbf{Filters} & \textbf{What it teaches} \\ \hline
-GQ-1 & \textit{``What is the gross requirement split between ingredients and packaging for the next 3 months?''} &
+VQ-1 & \textit{``What is the gross requirement split between ingredients and packaging for the next 3 months?''} &
 Forecast month from the current month for 3 months. &
 ``Ingredients'' and ``packaging'' as values of the material type; results grouped by month and unit of measure. \\ \hline
-GQ-2 & \textit{``How many trays do I need in Santa Sofia for the next 5 days?''} &
+VQ-2 & \textit{``How many trays do I need in Santa Sofia for the next 5 days?''} &
 Platform \texttt{S10}; material contains ``Vas''; forecast date from today for 5 days. &
 Place name resolved to a platform code; ``trays'' resolved from the material description. \\ \hline
-GQ-3 & \textit{``Considering only Elaborati, how many packaging materials do I need until the end of the year?''} &
+VQ-3 & \textit{``Considering only Elaborati, how many packaging materials do I need until the end of the year?''} &
 Material type \textit{Imballo}; product line \textit{Elaborati}; forecast date until the end of the current year. &
 Product line and material type combined; results by material and unit of measure. \\ \hline
-GQ-4 & \textit{``What is the expected consumption of I02165 in Cesena?''} &
+VQ-4 & \textit{``What is the expected consumption of I02165 in Cesena?''} &
 Platform \texttt{S01}; material starts with \texttt{I02165}. &
 ``Consumption'' as gross requirement; code matched at the start of the material field; daily trend. \\ \hline
 \end{tabularx}
-\caption{Golden queries defined for the Material Planning agent.}
-\label{tab:golden_queries}
+\caption{Verified queries defined for the Material Planning agent.}
+\label{tab:verified_queries}
 \end{table}
 
-\paragraph{Mapping business terms}
-The first three queries show the agent how planners name the categories of the model. In GQ-1 and GQ-3, ``ingredients'' and ``packaging'' are mapped to the values of \texttt{tipo\_\allowbreak materiale}, the dimension introduced in \Cref{sec:tuning_and_migration}, and in GQ-3 ``Elaborati'' is mapped to the product line. In GQ-2, the name of the plant is resolved to its platform code, and ``trays'' (\textit{vassoi}) to the materials whose description contains ``Vas'', which is how planners themselves search for trays in the Explore.
+Each verified query also fixes how the answer is presented: horizontal bars by month and type in VQ-1, bars by material in VQ-2 and VQ-3, and a line over time in VQ-4. For these questions, the presentation is therefore defined in advance, which partly offsets the limits discussed in \Cref{sec:visualization_governance}.
 
-\paragraph{Codes and units of measure}
-GQ-4 complements the exact-match rule of \Cref{sec:tuning_and_migration}. Since the material code is stored together with its description in the dimension \texttt{materiale.\allowbreak materiale}, the query filters on the values that \emph{start with} \texttt{I02165}, rather than on those that contain it. The word ``consumption'' is mapped to the gross requirement measure. Since the question asks for an analysis of a single material and does not specify a horizon, the query covers the whole available forecast horizon, by day. GQ-1 and GQ-3 also show how to handle units of measure: they group the results by unit, so that quantities expressed in different units are never added together.
-
-\paragraph{Visualization}
-Each golden query also fixes how the answer is presented: horizontal bars by month and type in GQ-1, bars by material in GQ-2 and GQ-3, and a line over time in GQ-4. For these questions, the presentation is therefore defined in advance, which partly offsets the limits discussed in \Cref{sec:visualization_governance}.
-
-\paragraph{Limitations}
-Golden queries are examples, not rules: they guide the agent on similar questions but do not guarantee its behavior on different ones, so they complement the instructions rather than replace them. They also require maintenance, since every change to the model or to the instructions has to be reflected in the Explore queries they point to.
+Verified queries, however, are examples, not rules: they guide the agent on similar questions but do not guarantee its behavior on different ones, so they complement the instructions rather than replace them. They also require maintenance, since every change to the model or to the instructions has to be reflected in the Explore queries they point to.
 
 \section[Iterative Tuning of the Agent]{Iterative Tuning and Upstream Migration of Business Logic}
 \label{sec:tuning_and_migration}
 
-The agent was not configured in a single step. Its behavior was refined through repeated test questions, using the \textbf{Show Thinking} option of Looker's Conversational Analytics. For each answer, Show Thinking displays the agent's reasoning: how it interpreted the question, which fields and filters it chose, and which query or Python code it ran. Reading these traces made it possible to see where the agent was guessing and to correct the cause, either in the instructions or in the data model. Two cases are described below: in the first, the correction was made in the data model; in the second, in the instructions.
+The agent was not configured in a single step. Its behavior was refined through repeated test questions, using the \textbf{Show Thinking} option of Looker's Conversational Analytics. For each answer, Show Thinking displays the agent's reasoning: how it interpreted the question, which fields and filters it chose, and which query or Python code it ran. Reading these traces made it possible to see where the agent was guessing and to correct the cause, either in the instructions or in the data model. Three cases are described below: in the first, the correction was made in the data model; in the second, in the instructions; in the third, a rule first added to the instructions was later made largely redundant by a change in the model.
 
 \paragraph{From agent heuristics to the backend: the material type}
 In the first tests, a question such as \textit{``Split ingredients from packaging''} could not be answered with a field of the model, because the Explore did not yet expose a material type. The agent did not stop there: its Show Thinking trace revealed that it retrieved the material codes and used Python to infer a classification from their structure:
@@ -160,18 +148,23 @@ The inference was plausible, but it had three problems. It was not an official r
 
 The official classification, however, already exists in JD Edwards, in the item master data. It was therefore added to the exported master table \texttt{L\_ART\_JDE} as the column \texttt{TIPO\_MAT}, and exposed in LookML as a simple mapping to that column, the \texttt{tipo\_materiale} dimension shown in \Cref{lst:lookml_master}. After the change, the same question is answered with a single query that groups by \texttt{tipo\_materiale}, without Python.
 
-This case shows a general rule, consistent with the \textit{pushing transformations upstream} practice of \Cref{sec:looker_lookml}: the agent should not compute business rules on its own. When its reasoning reveals a missing concept, the concept should be defined in the data model and, when possible, taken from the source system. The same approach is proposed for the identification of labels, discussed among the limitations at the end of \Cref{sec:system_instructions}.
+This case shows a general rule, consistent with the \textit{pushing transformations upstream} practice of \Cref{sec:looker_lookml}: the agent should not compute business rules on its own. When its reasoning reveals a missing concept, the concept should be defined in the data model and, when possible, taken from the source system. The same approach is proposed for the identification of labels, which cannot be distinguished from other packaging materials in the current data model.
 
 \paragraph{Exact matches and the superset trap}
 A second problem appeared with questions containing codes, such as \textit{``How many ingredients are needed for item 00700?''}. Instead of running the query, the agent stopped and asked whether the user meant \texttt{00700} or one of the codes that contain it, such as \texttt{00700F} or \texttt{100200700}. This behavior, which the agent's own reasoning calls the \textbf{superset trap}, is reasonable for vague text, but not for a code that the user has written exactly.
 
 The following rule was added to the default behaviors of the instructions:
 \begin{quote}
-\small\textit{``Se l'utente fornisce un codice (articolo, materiale, piattaforma o unità di misura), questo deve essere considerato una corrispondenza esatta (EXACT\_MATCH). Se il codice inserito è presente nel database, non applicare la logica `Superset Trap' e non richiedere chiarimenti su codici simili o che lo contengano.''}\footnote{``If the user provides a code (item, material, platform, or unit of measure), it must be treated as an exact match (EXACT\_MATCH). If the code is present in the database, do not apply the `Superset Trap' logic and do not ask for clarification about similar codes or codes that contain it.''}
+\small\textit{``If the user provides a code (item, material, platform, or unit of measure), it must be treated as an exact match (EXACT\_MATCH). If the code is present in the database, do not apply the `Superset Trap' logic and do not ask for clarification about similar codes or codes that contain it.''}
 \end{quote}
 With this rule, when a code exists in the data the agent filters on it directly, and asks for clarification only when the code is not found.
 
-\section[Visualization Limits]{Visualization Limits}
+\paragraph{Platform names: from an instruction to the model}
+One of the first tests revealed a problem with questions that name a city, such as \textit{``What is next month's requirement in Cesena?''}. The platform master data \texttt{l\_ptf} lists all the logistics platforms, plants, and warehouses of the company, and several of them are located in the same city, so their descriptions contain the same name. Show Thinking showed that the agent could not determine which of these platforms the user meant.
+
+The first correction was made in the instructions: the default platform filter of \Cref{lst:agent_instructions} restricts every query to the six platforms relevant to material planning. Following the practice of keeping frequently used attributes directly in the fact table, the platform code was then also added to the fact view, as \texttt{f\_material\_planning.\allowbreak piattaforma\_cod}. Since the fact table contains only the six relevant platforms, each located in a different city, a filter on this field can no longer select a platform outside the material planning perimeter. As a result, the default platform filter is no longer needed to define the perimeter, and is kept in the instructions only as a safeguard.
+
+\section{Limits of Agent-Generated Charts}
 \label{sec:visualization_governance}
 
 The tests showed a clear gap between the agent's reasoning and its charts. The agent follows the instructions when it interprets a question, chooses fields and filters, and computes results. Its charts, however, are reliable only when they are simple and use a linear scale.
@@ -180,7 +173,7 @@ The tests showed a clear gap between the agent's reasoning and its charts. The a
 Conversational Analytics draws charts with Vega-Lite~\cite{googlecloudlookercaoverview2026, vegalite2026}. Line, area, bar, scatter, and pie charts are supported, and each question must be answerable by a single visualization. The documentation does not explain how to set scales or axes. Advanced Analytics can draw charts in Python, with libraries such as Altair and matplotlib, but its answers may be more variable~\cite{googlecloudlookeraa2026}.
 
 \paragraph{What the tests showed}
-Material requirements are hard to chart: a few materials often account for most of the total, so on a linear scale they flatten all the others. The instructions ask the agent to show such data in a table, and to use a logarithmic scale only when the user asks for it. In the tests, a request for a chart of all ingredients in Cesena produced a single bar chart with a linear scale, where the largest item hides the others (\Cref{fig:agent_chart_single}). An explicit request for a logarithmic scale produced an empty chart, although the answer stated that the chart had been generated correctly (\Cref{fig:agent_chart_log_empty}). The same question also gave a table in one session and a chart in another. Conversely, when explicitly asked to produce one chart for each unit of measure, the agent returned several charts in the same answer. \Cref{tab:viz_doc_vs_tests} compares these observations with the documentation.
+Material requirements are hard to chart: a few materials often account for most of the total, so on a linear scale they flatten all the others. The instructions ask the agent to show such data in a table, and to use a logarithmic scale when the user asks for it. In the tests, a request for a chart of all ingredients in Cesena produced a single bar chart with a linear scale, where the largest item hides the others (\Cref{fig:agent_chart_single}). An explicit request for a logarithmic scale produced an empty chart, although the answer stated that the chart had been generated correctly (\Cref{fig:agent_chart_log_empty}). Conversely, when explicitly asked to produce one chart for each unit of measure, the agent returned several charts in the same answer. \Cref{tab:viz_doc_vs_tests} compares these observations with the documentation.
 
 \begin{figure}[htbp]
     \centering
@@ -220,13 +213,8 @@ These limits cannot be fixed through the instructions, which shape the agent's r
 
 \Cref{sec:organizational_transformation} described the shift of the Data Office from a service team that builds reports on request to a governance team that defines and certifies shared semantic assets. The conversational agent makes this shift concrete, and adds new tasks to it.
 
-For planners, supported by the Data \& AI Champions, the agent removes the need to know the model: questions can be asked in business vocabulary, and the answers are computed on the certified definitions of the semantic layer. The constraints that are not yet part of the model, such as the platform perimeter and the exact match on codes, are applied through the instructions, and therefore depend on the agent following them; this is why the answers, and especially the charts, still need to be read critically.
+For business users, supported by the Data \& AI Champions, the agent removes the need to know the model: questions can be asked in business vocabulary, and the answers are computed on the certified definitions of the semantic layer. The constraints that are not yet part of the model, such as the exact match on codes, are applied through the instructions, and therefore depend on the agent following them; this is why the answers, and especially the charts, still need to be read critically.
 
-For the Data Office, the work moves from answering individual requests to maintaining the context in which the agent operates:
-\begin{itemize}
-    \item \textbf{Instructions and golden queries:} the terminology, defaults, and reference examples of \Cref{sec:system_instructions,sec:golden_queries} have to be kept aligned with the model and with the way planners actually ask questions.
-    \item \textbf{Reading the reasoning traces:} Show Thinking reveals where the agent is guessing, as in the cases of \Cref{sec:tuning_and_migration}, and is the main source for deciding what to correct.
-    \item \textbf{Moving business logic upstream:} when a trace reveals a missing concept, the Data Office defines it in the data model and, where possible, takes it from the source system, as was done for the material type and is planned for labels.
-\end{itemize}
+For the Data Office, the work moves from answering individual requests to maintaining the context in which the agent operates. The terminology, defaults, and reference examples of \Cref{sec:system_instructions,sec:verified_queries} have to be kept aligned with the model and with the way business users actually ask questions. The main source for deciding what to correct is the agent's own reasoning: as in the cases of \Cref{sec:tuning_and_migration}, Show Thinking reveals where the agent is guessing. When a trace reveals a missing concept, the right answer is often not another rule in the instructions but a change to the data model: the Data Office defines the concept there and, where possible, takes it from the source system, as was done for the material type and the platform code, and as is proposed for labels.
 
 In this way, the agent does not replace the semantic layer but depends on it: the more business concepts are defined in the model, the fewer rules the agent has to infer, and the more reliable its answers become.

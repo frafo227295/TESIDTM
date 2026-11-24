@@ -24,30 +24,27 @@
 \contentsline {subsection}{\numberline {5.2.2}Centralized governance and the DRY principle in Security Design}{24}{subsection.5.2.2}%
 \contentsline {subsection}{\numberline {5.2.3}Implementation: Material Planning fact and master views}{25}{subsection.5.2.3}%
 \contentsline {subsection}{\numberline {5.2.4}Model definition: relational joins and access perimeter}{30}{subsection.5.2.4}%
-\contentsline {paragraph}{Known limitation and planned improvement: units of measure}{32}{section*.7}%
+\contentsline {paragraph}{Known limitation and planned improvement: units of measure}{32}{section*.6}%
 \contentsline {subsection}{\numberline {5.2.5}Development lifecycle and version control}{33}{subsection.5.2.5}%
 \contentsline {subsection}{\numberline {5.2.6}Semantic modeling for self-service exploration and AI enablement}{34}{subsection.5.2.6}%
-\contentsline {paragraph}{Enabling governed self-service Business Intelligence}{34}{section*.8}%
-\contentsline {paragraph}{Enabling grounded generative AI Agents}{37}{section*.9}%
+\contentsline {paragraph}{Enabling governed self-service Business Intelligence}{34}{section*.7}%
+\contentsline {paragraph}{Enabling grounded generative AI Agents}{37}{section*.8}%
 \contentsline {section}{\numberline {5.3}Metadata Architecture Roadmap}{37}{section.5.3}%
-\contentsline {chapter}{\numberline {6}Conversational Analytics and Agentic Workflows with Gemini in Looker}{41}{chapter.6}%
+\contentsline {chapter}{\numberline {6}Conversational Analytics with Gemini in Looker}{41}{chapter.6}%
 \contentsline {section}{\numberline {6.1}Introduction}{41}{section.6.1}%
 \contentsline {section}{\numberline {6.2}Looker Conversational Modalities}{42}{section.6.2}%
-\contentsline {section}{\numberline {6.3}System Instructions and Domain Contextualization}{44}{section.6.3}%
-\contentsline {paragraph}{Role and response policy}{44}{section*.7}%
-\contentsline {paragraph}{Business terminology}{44}{section*.8}%
-\contentsline {paragraph}{Default behaviors and filters}{45}{section*.9}%
-\contentsline {paragraph}{Limitations and future improvements}{46}{section*.10}%
-\contentsline {section}{\numberline {6.4}Golden Queries}{46}{section.6.4}%
-\contentsline {paragraph}{Mapping business terms}{47}{section*.11}%
-\contentsline {paragraph}{Codes and units of measure}{47}{section*.12}%
-\contentsline {paragraph}{Visualization}{48}{section*.13}%
-\contentsline {paragraph}{Limitations}{48}{section*.14}%
+\contentsline {section}{\numberline {6.3}System Instructions: Encoding Domain Knowledge}{44}{section.6.3}%
+\contentsline {paragraph}{Role and response policy}{44}{section*.9}%
+\contentsline {paragraph}{Business terminology}{44}{section*.10}%
+\contentsline {paragraph}{Default behaviors and filters}{45}{section*.11}%
+\contentsline {section}{\numberline {6.4}Verified Queries}{46}{section.6.4}%
 \contentsline {section}{\numberline {6.5}Iterative Tuning of the Agent}{48}{section.6.5}%
-\contentsline {paragraph}{From agent heuristics to the backend: the material type}{48}{section*.15}%
-\contentsline {paragraph}{Exact matches and the superset trap}{49}{section*.16}%
-\contentsline {section}{\numberline {6.6}Visualization Limits}{50}{section.6.6}%
-\contentsline {paragraph}{What the documentation states}{50}{section*.17}%
-\contentsline {paragraph}{What the tests showed}{50}{section*.18}%
-\contentsline {paragraph}{Implications}{52}{section*.19}%
+\contentsline {paragraph}{From agent heuristics to the backend: the material type}{48}{section*.12}%
+\contentsline {paragraph}{Exact matches and the superset trap}{49}{section*.13}%
+\contentsline {paragraph}{Platform names: from an instruction to the model}{49}{section*.14}%
+\contentsline {section}{\numberline {6.6}Limits of Agent-Generated Charts}{49}{section.6.6}%
+\contentsline {paragraph}{What the documentation states}{50}{section*.15}%
+\contentsline {paragraph}{What the tests showed}{50}{section*.16}%
+\contentsline {paragraph}{Implications}{50}{section*.17}%
 \contentsline {section}{\numberline {6.7}Impact on the Data Office}{52}{section.6.7}%
+\contentsline {chapter}{\numberline {7}Conclusions}{53}{chapter.7}%
