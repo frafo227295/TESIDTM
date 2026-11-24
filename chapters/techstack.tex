@@ -499,5 +499,46 @@ To decouple business glossary governance from technical codebases and automate e
 
 In this target framework, OpenMetadata ingests metadata from Looker and the underlying databases through their APIs, reducing manual synchronization. This separates analytical query compilation, performed in-database by Looker on Oracle and BigQuery, from enterprise-wide metadata governance, a further step toward federated Data Products.
 
+\subsection{A tool-independent representation of the domain: OKF}
+\label{subsec:okf}
+
+Before any metadata is loaded into OpenMetadata, the Material Planning domain was described in the Open Knowledge Format (OKF) \cite{googlecloudokf2026, okfspec2026}, an open specification that represents knowledge as a directory of Markdown files with a YAML header. Each file describes one concept; the only mandatory field is its \texttt{type}, and relationships between concepts are expressed as ordinary Markdown links.
+
+This intermediate step was chosen for two reasons. First, OKF is readable and editable by business and technical users alike, yet structured enough to be transformed, through a suitable prompt to a language model, into the format required by each consumer: glossary terms for OpenMetadata, \texttt{description} and \texttt{synonyms} parameters in LookML, or the business terminology in the agent's system instructions (\Cref{sec:system_instructions}). The same definitions, written once, can therefore feed all the layers described in this chapter. Second, it allowed the ontology of the problem (\Cref{sec:business_glossary_ontology}) to be built and agreed with the business before choosing the platform that will host it, so that the content does not depend on the tool.
+
+The concepts are organized in three dimensions, recorded in each file through a custom header field:
+\begin{itemize}
+    \item \textbf{Business concepts:} the terms used by planners, such as gross requirement, Bill of Materials, the PFL, PN, and PFN product types, platforms, and units of measure.
+    \item \textbf{Intermediate forms:} the steps of the calculation engine described in \Cref{chap:demandforecast}, from the unified demand trajectory to the BOM explosion. They are neither terms used by the business nor source tables, but they explain how a business concept is obtained from the data.
+    \item \textbf{Technical concepts:} the BigQuery tables, the LookML views, and the Explore described in \Cref{sec:looker_lookml}.
+\end{itemize}
+
+\subsection{From OKF to a knowledge graph}
+\label{subsec:okf_kg}
+
+Since every OKF concept has a type and links to other concepts, the bundle can be converted automatically into a graph. A script turns each concept into a node, using its dimension as class, and each link into an edge. Because OKF links are untyped, the name of the relation (for example \textit{produces}, \textit{exposes}, \textit{reads}) is derived from the sentence in which the link appears. The result is exported both as JSON and as RDF, so that it can be queried with SPARQL or loaded into a graph store. \Cref{fig:okf_kg} shows the graph obtained for Material Planning: 35 concepts and 69 relations.
+
+\begin{figure}[p]
+    \centering
+    \rotatebox{90}{\resizebox{!}{0.9\textwidth}{\input{figures/okf_kg.tex}}}
+    \caption{Knowledge graph generated from the OKF representation of the Material Planning domain. Business concepts (left), intermediate forms of the calculation (center, numbered in execution order), and technical assets (right). Dashed lines link a technical asset to the business concept it exposes.}
+    \label{fig:okf_kg}
+\end{figure}
+
+The graph makes explicit the chain that connects a business question to the data. The gross requirement, for instance, is produced by the BOM explosion, which uses the Bill of Materials and the platform shares; the explosion writes into \texttt{F\_MATERIAL\_PLANNING}, which is read by the view \texttt{f\_material\_planning}, which in turn exposes the gross requirement to users. The intermediate forms occupy the center of the figure because they connect the other two dimensions: without them, the link between a business term and a table would be a simple mapping, with no account of how the value is computed.
+
+Compared with the enterprise knowledge graph described in \Cref{sec:knowledge_graphs}, this graph is still at the level of the schema: its nodes are concepts and assets, not individual materials, platforms, or products. Populating it with these instances, and using it as a grounding source for the conversational agent through GraphRAG, are possible next steps.
+
+\subsection{From OKF to OpenMetadata}
+\label{subsec:okf_openmetadata}
+
+The OKF bundle is also the source from which OpenMetadata will be populated, following four steps:
+\begin{enumerate}
+    \item \textbf{Review:} each concept is validated with the Data \& AI Champions. Its \texttt{status} field moves from \textit{draft} to \textit{verified}, which corresponds to the approval of a glossary term by its reviewers in OpenMetadata.
+    \item \textbf{Glossary loading:} business concepts are converted into glossary terms, with definitions, synonyms, related terms, and owners, and loaded through the glossary import or the REST API.
+    \item \textbf{Technical ingestion:} tables, views, and Explores are not created by hand but ingested by the OpenMetadata connectors for Oracle, BigQuery, and Looker. The \texttt{resource} field of each technical concept identifies the corresponding asset, and its OKF description is used to complete the asset's documentation.
+    \item \textbf{Linking:} the links of the graph are translated into OpenMetadata relations. Glossary terms are assigned to the tables and columns that expose them, and intermediate forms become related terms or, where they correspond to a calculation step, lineage between assets.
+\end{enumerate}
+
 \bigskip
 In summary, the technical architecture adopted at Amadori S.p.A. supports a phased transition from on-premises Oracle toward Google BigQuery, with Looker acting as an in-database Semantic Layer that shields reports and AI interfaces from changes in the underlying storage. The LookML model centralizes metric definitions according to the DRY principle, enforces platform-level access through user attributes, and exposes the Material Planning domain as a curated set of business fields. The next chapter examines how this semantic layer is used by conversational agents through Gemini in Looker.
