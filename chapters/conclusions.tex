@@ -4,5 +4,95 @@
 \label{chap:conclusions}
 %----------------------------------------------------------------------------------------
 
-Write conclusions here.
+This thesis started from a structural misalignment: enterprise data is written by operational systems to run day-to-day transactions, but it is later read to support decisions that those systems were never designed for. At Amadori S.p.A., this gap is particularly visible in planning. Rigid biological lead times, perishable products, and volatile retail demand make the translation of demand forecasts into material requirements a critical step (\Cref{chap:context}), and the Material Planning engine described in \Cref{chap:demandforecast} was chosen as the domain in which to address it.
 
+The work combined an architectural and organizational framework (\Cref{chap:architecture}) with its implementation on a concrete technological stack (\Cref{chap:techstack}): a semantic layer in Looker and LookML on top of the material requirements calculated by the engine, a tool-independent representation of the domain in the Open Knowledge Format, and a conversational agent built with Gemini in Looker (\Cref{chap:conversational_agent}). This chapter summarizes the main results, discusses the limitations of the work, and outlines how it can be extended.
+
+%----------------------------------------------------------------------------------------
+\section{Summary of the Contributions}
+\label{sec:conclusions_contributions}
+%----------------------------------------------------------------------------------------
+
+\paragraph{The semantic layer as a contract between data and its consumers}
+The LookML model of \Cref{sec:looker_lookml} turns the output of the Material Planning engine into a small catalog of certified business fields. Each metric is defined once and reused by every Explore, Look, dashboard, and agent, following the DRY principle. Access to platforms is governed by a single \texttt{access\_filter} bound to user attributes, instead of one copy of each report per site. Technical keys and uncurated columns stay outside the semantic boundary. Because the definitions are separate from the physical storage, the same model can move from the BigQuery sandbox to Oracle and later to production BigQuery mainly by changing its connection, without affecting the consumers (\Cref{sec:backend_infrastructure}). Finally, managing the model as versioned code, with validation and review before every deployment, makes each change to a definition traceable and reversible.
+
+\paragraph{A conversational agent that depends on the semantic model}
+The conversational agent was not built as a generic Text-to-SQL generator, but bound to the \texttt{material\_planning} Explore, so that every answer is computed on the certified definitions. The work of \Cref{chap:conversational_agent} shows that this binding is necessary but not sufficient. System instructions were needed to encode the business terminology and the defaults for incomplete questions (\Cref{sec:system_instructions}), and verified queries to provide reference mappings for typical questions (\Cref{sec:verified_queries}). The most relevant result, however, came from the iterative tuning of \Cref{sec:tuning_and_migration}. Reading the agent's reasoning through Show Thinking showed where it was guessing, and in two of the three cases analyzed the right correction was not a new instruction but a change to the data model: the material type was taken from the item master data in JD Edwards, and the platform code was added to the fact table. The agent thus became a diagnostic tool for the model itself. This leads to the principle that runs through the whole thesis: the more business concepts are defined in the semantic model, the fewer rules the agent has to infer, and the more reliable its answers become. The tests also showed where this principle stops: the charts produced by the agent are reliable only when they are simple, and cannot be corrected through the instructions (\Cref{sec:visualization_governance}).
+
+\paragraph{A tool-independent representation of the domain}
+Before choosing the platform that will host the business glossary, the Material Planning domain was described in the Open Knowledge Format (\Cref{subsec:okf}). The concepts were organized in three dimensions: business concepts, the intermediate forms of the calculation, and technical assets. This representation can be read and reviewed by business users and, at the same time, converted automatically into a knowledge graph of 35 concepts and 69 relations (\Cref{subsec:okf_kg}). The graph makes explicit the chain that links a business question to the table and the view that answer it, through the calculation steps that produce the value. The same definitions, written once, can feed the LookML descriptions and synonyms, the agent's instructions, and the future OpenMetadata glossary, so that the content of the ontology does not depend on the tool that hosts it.
+
+\paragraph{The organizational dimension}
+The technical results are tied to a change in roles (\Cref{sec:organizational_transformation}). Data \& AI Champions use the Explore and the Looks to answer their own questions within governed boundaries, and their colleagues can query the agent in business vocabulary. The work of the Data Office therefore moves from building reports on request to maintaining the assets on which these tools depend: the semantic model, the definitions, the instructions and the reference examples of the agent, and, in the future, the glossary in OpenMetadata (\Cref{sec:data_office_transformation}). In this model, the agent's reasoning traces become a source of requirements for the Data Office, pointing to the business concepts that are still missing from the model.
+
+%----------------------------------------------------------------------------------------
+\section{Limitations}
+\label{sec:conclusions_limitations}
+%----------------------------------------------------------------------------------------
+
+The results described above were obtained on a prototype, and should be read with the following limitations in mind.
+
+\paragraph{A prototype setup}
+The semantic model and the agent were developed on a BigQuery sandbox populated with manual exports of the Oracle tables (\Cref{sec:backend_infrastructure}). This setup made it possible to work on real data, but not on data that is updated every day. The behavior of the model and of the agent has therefore not yet been observed in daily operation, with the nightly refresh of the Material Planning engine and with real users.
+
+\paragraph{Gross requirements only}
+The Material Planning engine computes gross requirements. On-hand inventory and open purchase orders are not yet considered, so the figures exposed by the semantic layer indicate how much material is needed, but not how much has to be bought (\Cref{chap:demandforecast}).
+
+\paragraph{Open gaps in the semantic model}
+The model still contains known gaps. The measure \texttt{fabbisogno\_\allowbreak materiale} can sum quantities expressed in different units of measure, and only the attention of the user or of the author of a Look prevents it (\Cref{sec:looker_lookml}). Labels cannot yet be distinguished from other packaging materials. Some rules, such as the exact match on codes, are enforced only through the agent's instructions, and therefore depend on the agent following them.
+
+\paragraph{No quantitative evaluation of the agent}
+The agent was tuned through test questions and through the analysis of its reasoning traces, but it was not evaluated on a predefined set of questions with expected answers. The improvements described in \Cref{sec:tuning_and_migration} are therefore qualitative: the work shows which errors were found and how they were corrected, but it does not measure how often the agent answers correctly, nor how its accuracy changed over time. For the same reason, the effects on the time and effort of business users and of the Data Office are expected, not measured.
+
+\paragraph{Limits of the agent's charts}
+As discussed in \Cref{sec:visualization_governance}, the charts produced by the agent are reliable only when they are simple and use a linear scale, and the same question may produce a table in one session and a chart in another. These limits depend on the platform and cannot be corrected through the instructions.
+
+\paragraph{Governance and knowledge graph not yet implemented}
+OpenMetadata is part of the roadmap and has not yet been deployed (\Cref{sec:openmetadata_roadmap}). The business definitions are currently kept in LookML, where they can be edited only through Git. The knowledge graph obtained from OKF describes the schema of the domain, not its instances, and it is not yet used by the agent.
+
+\paragraph{Scope}
+The work covers a single domain, Material Planning, and a single technological platform for both the semantic layer and the agent. The approach is not tied to Looker, but its application to other domains and other tools has not been tested.
+
+%----------------------------------------------------------------------------------------
+\section{Future Developments}
+\label{sec:conclusions_future}
+%----------------------------------------------------------------------------------------
+
+The limitations above point directly to the next steps of the work.
+
+\paragraph{From prototype to production}
+The first step is the direct connection between Looker and Oracle, which will replace the manual exports and let the model and the agent run on daily data. The model will then be pointed to production BigQuery once the Material Planning pipeline has been migrated. Since the definitions are separate from the storage, both steps mainly require changing the model connection and adapting dialect-specific SQL.
+
+\paragraph{From gross to net requirements}
+The next phase of the Material Planning project will take on-hand inventory into account to compute net requirements. In the semantic layer, this will mean adding the inventory data and the new measures, with the same approach used for gross requirements: the logic is computed upstream, in the engine, and Looker exposes the result as certified fields.
+
+\paragraph{Closing the gaps in the model}
+The single selection of the unit of measure through a LookML \texttt{parameter} (\Cref{lst:lookml_um_param}) will move the aggregation rule from the attention of users into the model. The classification of labels will be taken from the source system, as was done for the material type. More generally, every rule that is currently written only in the agent's instructions is a candidate to be moved into the model, so that it applies to all consumers and not only to the agent. Column-Level Security through \texttt{required\_access\_grants} can be added when sensitive measures, such as costs, enter the model.
+
+\paragraph{A systematic evaluation of the agent}
+The agent described in \Cref{chap:conversational_agent} was refined qualitatively, by reading its reasoning traces question by question (\Cref{sec:tuning_and_migration}). This showed where it was guessing, but it does not measure how often it answers correctly, on which kinds of questions it fails, or why. A systematic evaluation against a ground truth is therefore a natural next step.
+
+Since the gross requirement is recalculated every day, the ground truth cannot be a fixed number. For each test question it should instead be a reference Explore query, with its fields and filters, as is done for verified queries. The answer of the agent is then compared with the result of the reference query executed at the same time, following the \textit{execution accuracy} criterion used in text-to-SQL benchmarks such as Spider and BIRD \cite{yu2018spider, li2023bird}. The four verified queries of \Cref{tab:verified_queries} could form the first nucleus of the test set, which should cover different types of questions: direct lookups of a code, business terminology (place names, synonyms such as ``trays''), aggregations across material types and units of measure, multi-step questions that require chaining several concepts (for example, the labels needed by the PFNs of a given PN), questions that rely on implicit rules such as the platform perimeter, and questions that cannot or should not be answered, such as those on the net requirement, which is not yet calculated.
+
+Each wrong answer would then be classified through its trace, distinguishing at least four causes: \textit{missing knowledge}, when the concept is not defined anywhere in the model or in the instructions; \textit{wrong mapping}, when the concept is available but the agent selects the wrong field or filter; \textit{wrong reasoning}, when fields and filters are correct but the logic is not, for example in the time window or in the sum of different units of measure; and \textit{wrong ground truth}, when the reference answer itself is incorrect. Error analyses on text-to-SQL benchmarks show that the second category is usually the most frequent, and that errors in the reference answers are far from negligible \cite{lee2024mcssql}. The distinction matters because each cause has a different remedy: extending the model or the OKF representation, adding synonyms or verified queries, refining the instructions or moving the rule upstream, or correcting the test.
+
+The same test set would also make it possible to measure the contribution of each layer of context, by running it with increasing configurations: the LookML model alone, then with the system instructions, then with the verified queries, and finally with the knowledge derived from the OKF representation and the knowledge graph (\Cref{subsec:okf_kg}). Studies on GraphRAG show that graph-based context improves some types of questions, mainly multi-step ones, while bringing little or no benefit to others \cite{xiang2025graphrag}. Comparing accuracy by question type would show whether, and for which questions, the knowledge graph is worth connecting to the agent. Each question should be repeated several times, since the agent does not always answer in the same way (\Cref{sec:visualization_governance}). Run again after every change to the model, the instructions, or the verified queries, the test set would also work as a regression test.
+
+Tools for this kind of evaluation already exist. Prism, an open-source tool released by Google for Conversational Analytics agents, works through the Looker API and checks each answer on its text, on the generated query, and on the returned data, with an optional language-model judge. It reports per-question results, repeated trials, and the differences between runs \cite{googlecloudprism2026}.
+
+\paragraph{Governance in OpenMetadata and a populated knowledge graph}
+The four steps described in \Cref{subsec:okf_openmetadata}, from the review of the OKF concepts with the Champions to the linking of glossary terms to tables and columns, will move the business glossary out of the LookML code and give business users direct ownership of the definitions. The knowledge graph can then be populated with instances, such as materials, platforms, and products, and connected to the agent through GraphRAG (\Cref{sec:knowledge_graphs}) if the evaluation described above shows that it improves the answers.
+
+\paragraph{Extension to other domains}
+Finally, the approach can be applied to other domains, starting from those closest to Material Planning, such as demand forecasting and production planning, and later to the other protein lines of the group. Each new domain would follow the same path: a description in OKF agreed with the business, a semantic model that exposes it, and an agent bound to that model. Over time, this would bring Amadori closer to the Data Product model described in \Cref{sec:data_product_paradigm}.
+
+%----------------------------------------------------------------------------------------
+\section{Closing Remarks}
+\label{sec:conclusions_closing}
+%----------------------------------------------------------------------------------------
+
+This thesis began from the observation that data is written to run operations and read to make decisions, and that the gap between the two is not closed by moving data from one system to another. The Material Planning case shows where it can be closed instead: in the definitions that give data its meaning. A gross requirement, a PFN, or a production platform becomes usable for decisions only when it is defined once, agreed with the business, and exposed in the same way to every consumer, whether a planner, a dashboard, or a language model.
+
+Conversational agents make this need more evident, not less. An agent can lower the barrier between business users and data, but it cannot create the meaning that is missing from the model: when a concept is not defined, the agent infers it, and the inference can change from one conversation to the next. The experience described in this work suggests that the reliability of an agent is decided upstream, in the way data is modeled and governed, rather than in the agent itself. For the same reason, the agent proved useful beyond answering questions: its reasoning showed which business concepts were still missing from the model.
+
+This changes the role of the Data Office. Its value lies less in the number of reports it produces and more in the quality of the shared definitions on which reports, Champions, and agents all depend. The semantic layer, the OKF representation of the domain, and in the future the glossary in OpenMetadata are the assets through which this role is exercised. The work presented here covers a single domain and a prototype setup, but the path it describes, from the business concept to the model and from the model to its consumers, can be repeated for each new domain. Following it is what allows an organization to read its data with the same meaning with which the data was written.
