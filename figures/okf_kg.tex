@@ -1,0 +1,121 @@
+\begin{tikzpicture}[
+    font=\scriptsize, >={Stealth[length=1.6mm]},
+    concept/.style={draw, align=center, minimum height=7mm, text width=27mm, inner sep=2pt, line width=0.4pt},
+    biz/.style={concept, rounded corners=3.5mm, fill=orange!18, draw=orange!70!black},
+    mid/.style={concept, fill=green!15, draw=green!45!black},
+    tec/.style={concept, chamfered rectangle, chamfered rectangle xsep=2mm, fill=violet!12, draw=violet!70!black},
+    rel/.style={->, gray!70!black, line width=0.35pt},
+    lbl/.style={font=\tiny, fill=white, inner sep=0.6pt, text=black!75}
+]
+    % business
+    \node[biz] (oriz) at (0.00,0.00) {Planning\\horizon};
+    \node[biz] (lin) at (0.00,-1.05) {Product line};
+    \node[biz] (fam) at (0.00,-2.10) {Product family};
+    \node[biz] (pfl) at (0.00,-3.15) {PFL};
+    \node[biz] (pfn) at (0.00,-4.20) {PFN};
+    \node[biz] (pn) at (0.00,-5.25) {PN};
+    \node[biz] (pc) at (0.00,-6.30) {Commercialized\\product};
+    \node[biz] (bom) at (0.00,-7.35) {Bill of Materials};
+    \node[biz] (mat) at (0.00,-8.40) {Material};
+    \node[biz] (um) at (0.00,-9.45) {Unit of measure};
+    \node[biz] (pp) at (0.00,-10.50) {Production\\platform};
+    \node[biz] (ps) at (0.00,-11.55) {Shipping\\platform};
+    \node[biz] (fl) at (0.00,-12.60) {Gross requirement};
+    \node[biz] (fn) at (0.00,-13.65) {Net requirement};
+    \node[biz] (per) at (0.00,-14.70) {Platform\\perimeter};
+    % intermediate
+    \node[mid] (traj) at (6.20,-0.75) {1. Demand\\trajectory};
+    \node[mid] (filt) at (6.20,-2.95) {2. Filtered\\demand};
+    \node[mid] (inc) at (6.20,-5.15) {3. PFN incidence\\on PN};
+    \node[mid] (map) at (6.20,-7.35) {4. PFN$\to$PN\\mapping};
+    \node[mid] (qp) at (6.20,-9.55) {5. Production\\platform shares};
+    \node[mid] (qs) at (6.20,-11.75) {6. Shipping\\platform shares};
+    \node[mid] (expl) at (6.20,-13.95) {7. BOM\\explosion};
+    % technical
+    \node[tec] (vl) at (12.40,0.00) {\texttt{l\_lin}};
+    \node[tec] (tl) at (12.40,-1.22) {\texttt{L\_LIN}};
+    \node[tec] (vfa) at (12.40,-2.44) {\texttt{l\_fam}};
+    \node[tec] (tfa) at (12.40,-3.66) {\texttt{L\_FAM}};
+    \node[tec] (va) at (12.40,-4.88) {\texttt{l\_art\_jde}};
+    \node[tec] (ta) at (12.40,-6.10) {\texttt{L\_ART\_JDE}};
+    \node[tec] (vu) at (12.40,-7.32) {\texttt{l\_um}};
+    \node[tec] (tu) at (12.40,-8.54) {\texttt{L\_UM}};
+    \node[tec] (vp) at (12.40,-9.76) {\texttt{l\_ptf}};
+    \node[tec] (tp) at (12.40,-10.98) {\texttt{L\_PTF}};
+    \node[tec] (vf) at (12.40,-12.20) {\texttt{f\_material\_planning}};
+    \node[tec] (tf) at (12.40,-13.42) {\texttt{F\_MATERIAL\_PLANNING}};
+    \node[tec] (ex) at (12.40,-14.64) {Explore\\\texttt{material\_planning}};
+    % relations (drawn behind the nodes)
+    \begin{scope}[on background layer]
+    \draw[rel] (bom.west) to[bend left=59] node[lbl, pos=0.5] {defined for} (pfl.west);
+    \draw[rel] (bom.west) to[bend left=42] node[lbl, pos=0.7] {defined for} (pn.west);
+    \draw[rel] (bom.west) to[bend left=50] node[lbl, pos=0.3] {defined for} (pfn.west);
+    \draw[rel] (expl.west) -- node[lbl, pos=0.5, sloped] {uses} (bom.east);
+    \draw[rel] (bom.east) -- node[lbl, pos=0.5, sloped] {constrains} (qp.west);
+    \draw[rel] (fl.west) to[bend left=59] node[lbl, pos=0.5] {refers to} (mat.west);
+    \draw[rel] (fl.west) to[bend left=50] node[lbl, pos=0.7] {constrained by} (um.west);
+    \draw[rel] (expl.west) -- node[lbl, pos=0.5, sloped] {produces} (fl.east);
+    \draw[rel, densely dashed, gray!60] (vf.west) to[out=180,in=0] (fl.east);
+    \draw[rel] (fl.west) to[bend right=33] node[lbl, pos=0.3] {basis of} (fn.west);
+    \draw[rel] (fam.west) to[bend right=33] node[lbl, pos=0.5] {classifies} (pfl.west);
+    \draw[rel] (fam.west) to[bend right=42] node[lbl, pos=0.7] {classifies} (pfn.west);
+    \draw[rel] (lin.west) to[bend right=42] node[lbl, pos=0.3] {classifies} (pfl.west);
+    \draw[rel] (lin.west) to[bend right=50] node[lbl, pos=0.5] {classifies} (pfn.west);
+    \draw[rel] (mat.west) to[bend left=33] node[lbl, pos=0.7] {component of} (bom.west);
+    \draw[rel, densely dashed, gray!60] (va.west) to[out=180,in=0] (mat.east);
+    \draw[rel] (mat.west) to[bend right=33] node[lbl, pos=0.3] {has} (um.west);
+    \draw[rel] (traj.west) -- node[lbl, pos=0.5, sloped] {implements} (oriz.east);
+    \draw[rel, densely dashed, gray!60] (vf.west) to[out=180,in=0] (oriz.east);
+    \draw[rel] (pfl.west) to[bend right=70] node[lbl, pos=0.5] {assigned to} (pp.west);
+    \draw[rel] (pfl.east) -- node[lbl, pos=0.5, sloped] {appears in} (traj.west);
+    \draw[rel, densely dashed, gray!60] (va.west) to[out=180,in=0] (pfl.east);
+    \draw[rel] (ps.west) to[bend left=70] node[lbl, pos=0.7] {for} (pfn.west);
+    \draw[rel] (pn.west) to[bend left=33] node[lbl, pos=0.3] {parent of} (pfn.west);
+    \draw[rel] (pfn.east) -- node[lbl, pos=0.5, sloped] {estimated with} (inc.west);
+    \draw[rel] (pfn.east) -- node[lbl, pos=0.5, sloped] {mapped via} (map.west);
+    \draw[rel, densely dashed, gray!60] (va.west) to[out=180,in=0] (pfn.east);
+    \draw[rel] (qp.west) -- node[lbl, pos=0.5, sloped] {allocates to} (pp.east);
+    \draw[rel, densely dashed, gray!60] (vp.west) to[out=180,in=0] (pp.east);
+    \draw[rel] (qs.west) -- node[lbl, pos=0.5, sloped] {allocates to} (ps.east);
+    \draw[rel, densely dashed, gray!60] (vp.west) to[out=180,in=0] (ps.east);
+    \draw[rel] (pn.west) to[bend right=67] node[lbl, pos=0.5] {assigned to} (pp.west);
+    \draw[rel, densely dashed, gray!60] (va.west) to[out=180,in=0] (pn.east);
+    \draw[rel] (filt.west) -- node[lbl, pos=0.5, sloped] {excludes} (pc.east);
+    \draw[rel, densely dashed, gray!60] (vu.west) to[out=180,in=0] (um.east);
+    \draw[rel] (traj.east) to[bend left=43] node[lbl, pos=0.5] {feeds} (filt.east);
+    \draw[rel] (expl.east) to[bend right=60] node[lbl, pos=0.7] {uses} (qp.east);
+    \draw[rel] (expl.east) to[bend right=43] node[lbl, pos=0.3] {uses} (qs.east);
+    \draw[rel] (expl.east) -- node[lbl, pos=0.5, sloped] {writes} (tf.west);
+    \draw[rel] (inc.west) -- node[lbl, pos=0.5, sloped] {links} (pn.east);
+    \draw[rel] (inc.east) to[bend left=70] node[lbl, pos=0.5] {feeds} (expl.east);
+    \draw[rel] (map.west) -- node[lbl, pos=0.5, sloped] {links} (pn.east);
+    \draw[rel] (map.east) -- node[lbl, pos=0.5, sloped] {uses} (va.west);
+    \draw[rel] (qs.east) to[bend right=43] node[lbl, pos=0.7] {same rules as} (qp.east);
+    \draw[rel] (qs.west) -- node[lbl, pos=0.5, sloped] {for} (pfn.east);
+    \draw[rel] (traj.east) -- node[lbl, pos=0.5, sloped] {measured in} (vf.west);
+    \draw[rel] (ex.east) to[bend right=45] node[lbl, pos=0.5] {uses} (vf.east);
+    \draw[rel] (ex.east) to[bend right=70] node[lbl, pos=0.7] {uses} (va.east);
+    \draw[rel] (ex.east) to[bend right=64] node[lbl, pos=0.3] {uses} (vp.east);
+    \draw[rel] (ex.east) to[bend right=70] node[lbl, pos=0.5] {uses} (vu.east);
+    \draw[rel] (ex.east) to[bend right=70] node[lbl, pos=0.7] {uses} (vl.east);
+    \draw[rel] (ex.east) to[bend right=70] node[lbl, pos=0.3] {uses} (vfa.east);
+    \draw[rel, densely dashed, gray!60] (ex.west) to[out=180,in=0] (per.east);
+    \draw[rel] (tf.east) to[bend right=70] node[lbl, pos=0.5] {FK} (ta.east);
+    \draw[rel] (tf.east) to[bend right=45] node[lbl, pos=0.7] {FK} (tp.east);
+    \draw[rel] (tf.east) to[bend right=64] node[lbl, pos=0.3] {FK} (tu.east);
+    \draw[rel] (vf.east) to[bend left=35] node[lbl, pos=0.5] {reads} (tf.east);
+    \draw[rel] (ta.east) to[bend right=64] node[lbl, pos=0.7] {FK} (tl.east);
+    \draw[rel] (ta.east) to[bend right=45] node[lbl, pos=0.3] {FK} (tfa.east);
+    \draw[rel] (va.east) to[bend left=35] node[lbl, pos=0.5] {reads} (ta.east);
+    \draw[rel] (vfa.east) to[bend left=35] node[lbl, pos=0.7] {reads} (tfa.east);
+    \draw[rel] (vl.east) to[bend left=35] node[lbl, pos=0.3] {reads} (tl.east);
+    \draw[rel] (vp.east) to[bend left=35] node[lbl, pos=0.5] {reads} (tp.east);
+    \draw[rel] (vu.east) to[bend left=35] node[lbl, pos=0.7] {reads} (tu.east);
+    \draw[rel, densely dashed, gray!60] (vfa.west) to[out=180,in=0] (fam.east);
+    \draw[rel, densely dashed, gray!60] (vl.west) to[out=180,in=0] (lin.east);
+    \end{scope}
+    \draw[rel, densely dashed, gray!60] (3.4,-15.70) -- ++(1.2,0) node[right, font=\scriptsize, text=black] {the technical asset exposes the business concept};
+    \node[font=\small\bfseries, text=orange!70!black] at (0,0.9) {Business concepts};
+    \node[font=\small\bfseries, text=green!45!black] at (6.2,0.9) {Intermediate forms};
+    \node[font=\small\bfseries, text=violet!70!black] at (12.4,0.9) {Technical concepts};
+\end{tikzpicture}
